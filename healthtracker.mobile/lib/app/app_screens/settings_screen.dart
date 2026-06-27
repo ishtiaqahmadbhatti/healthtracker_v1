@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'language_screen.dart';
+import 'feedback_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -64,7 +66,13 @@ class SettingsScreen extends StatelessWidget {
                               icon: _buildFlagIcon(),
                               title: 'Language option',
                               hasChevron: true,
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const LanguageScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _buildDivider(),
                             _buildSettingsItem(
@@ -122,7 +130,13 @@ class SettingsScreen extends StatelessWidget {
                               icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.black87, size: 22),
                               title: 'Feedback',
                               hasChevron: true,
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const FeedbackScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _buildDivider(),
                             _buildSettingsItem(
