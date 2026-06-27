@@ -1,6 +1,6 @@
 {
-    "name": "healthtracker",
-    "short_name": "healthtracker",
+    "name": "Health Tracker",
+    "short_name": "Health Tracker",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,0 +1,10 @@
+flutter clean
+flutter pub get
+flutter build appbundle --release
+build/app/outputs/bundle/release/app-release.aab
+flutter build appbundle --flavor production --release
+flutter build appbundle --release --no-tree-shake-icons
+flutter doctor
+flutter analyze
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
