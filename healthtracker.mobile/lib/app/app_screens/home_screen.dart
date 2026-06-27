@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import '../app_models/health_record.dart';
+import 'blood_pressure_screen.dart';
+import 'blood_sugar_screen.dart';
+import 'heart_rate_screen.dart';
+import 'weight_bmi_screen.dart';
+import 'info_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,109 +15,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<HealthRecord> _records = [
-    HealthRecord(
-      id: '1',
-      type: 'Heart Rate',
-      value: '72',
-      unit: 'bpm',
-      date: DateTime.now().subtract(const Duration(hours: 1)),
-      note: 'Resting heart rate in morning',
-      icon: Icons.favorite_rounded,
-      iconColor: const Color(0xFFEF4444),
-    ),
-    HealthRecord(
-      id: '2',
-      type: 'Blood Pressure',
-      value: '120/80',
-      unit: 'mmHg',
-      date: DateTime.now().subtract(const Duration(hours: 3)),
-      note: 'Normal reading after walk',
-      icon: Icons.speed_rounded,
-      iconColor: const Color(0xFF06B6D4),
-    ),
-    HealthRecord(
-      id: '3',
-      type: 'Blood Sugar',
-      value: '95',
-      unit: 'mg/dL',
-      date: DateTime.now().subtract(const Duration(hours: 5)),
-      note: 'Fasting blood sugar level',
-      icon: Icons.water_drop_rounded,
-      iconColor: const Color(0xFFF59E0B),
-    ),
-    HealthRecord(
-      id: '4',
-      type: 'Steps',
-      value: '5420',
-      unit: 'steps',
-      date: DateTime.now().subtract(const Duration(hours: 8)),
-      note: 'Walked in park',
-      icon: Icons.directions_walk_rounded,
-      iconColor: const Color(0xFF10B981),
-    ),
-  ];
+  final List<HealthRecord> _records = [];
 
-  // Quick stats computed
-  String get _latestHeartRate {
-    final hr = _records.firstWhere((r) => r.type == 'Heart Rate',
-        orElse: () => HealthRecord(
-              id: '',
-              type: 'Heart Rate',
-              value: '--',
-              unit: 'bpm',
-              date: DateTime.now(),
-              note: '',
-              icon: Icons.favorite,
-              iconColor: Colors.red,
-            ));
-    return '${hr.value} ${hr.unit}';
-  }
-
-  String get _latestBloodPressure {
-    final bp = _records.firstWhere((r) => r.type == 'Blood Pressure',
-        orElse: () => HealthRecord(
-              id: '',
-              type: 'Blood Pressure',
-              value: '--/--',
-              unit: 'mmHg',
-              date: DateTime.now(),
-              note: '',
-              icon: Icons.speed,
-              iconColor: Colors.cyan,
-            ));
-    return '${bp.value} ${bp.unit}';
-  }
-
-  String get _latestBloodSugar {
-    final bs = _records.firstWhere((r) => r.type == 'Blood Sugar',
-        orElse: () => HealthRecord(
-              id: '',
-              type: 'Blood Sugar',
-              value: '--',
-              unit: 'mg/dL',
-              date: DateTime.now(),
-              note: '',
-              icon: Icons.water_drop,
-              iconColor: Colors.amber,
-            ));
-    return '${bs.value} ${bs.unit}';
-  }
-
-  String get _latestSteps {
-    final st = _records.firstWhere((r) => r.type == 'Steps',
-        orElse: () => HealthRecord(
-              id: '',
-              type: 'Steps',
-              value: '--',
-              unit: 'steps',
-              date: DateTime.now(),
-              note: '',
-              icon: Icons.directions_walk,
-              iconColor: const Color(0xFF10B981),
-            ));
-    return '${st.value} ${st.unit}';
-  }
+  String _selectedCategory = 'Heart Rate';
+  int _currentTabIndex = 0;
 
   void _addRecord(HealthRecord record) {
     setState(() {
@@ -119,16 +26,18 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _deleteRecord(String id) {
-    setState(() {
-      _records.removeWhere((r) => r.id == id);
-    });
+  HealthRecord? _getLatestRecordOf(String type) {
+    try {
+      return _records.firstWhere((r) => r.type == type);
+    } catch (_) {
+      return null;
+    }
   }
 
-  void _showAddRecordSheet() {
+  void _showAddRecordSheet({String? initialType}) {
     final valueController = TextEditingController();
     final noteController = TextEditingController();
-    String selectedType = 'Heart Rate';
+    String selectedType = initialType ?? 'Heart Rate';
 
     showModalBottomSheet(
       context: context,
@@ -186,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             'Heart Rate',
                             'Blood Pressure',
                             'Blood Sugar',
-                            'Steps'
+                            'Weight & BMI'
                           ].map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
@@ -241,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF4444),
+                        backgroundColor: const Color(0xFFE53935),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -257,18 +166,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         switch (selectedType) {
                           case 'Heart Rate':
                             icon = Icons.favorite_rounded;
-                            iconColor = const Color(0xFFEF4444);
+                            iconColor = const Color(0xFFE54A4A);
                             unit = 'bpm';
                             break;
                           case 'Blood Pressure':
                             icon = Icons.speed_rounded;
-                            iconColor = const Color(0xFF06B6D4);
+                            iconColor = const Color(0xFF1E8D89);
                             unit = 'mmHg';
                             break;
                           case 'Blood Sugar':
                             icon = Icons.water_drop_rounded;
-                            iconColor = const Color(0xFFF59E0B);
+                            iconColor = const Color(0xFFFA9314);
                             unit = 'mg/dL';
+                            break;
+                          case 'Weight & BMI':
+                            icon = Icons.monitor_weight_rounded;
+                            iconColor = const Color(0xFF1E7BFA);
+                            unit = 'kg';
                             break;
                           default:
                             icon = Icons.directions_walk_rounded;
@@ -310,265 +224,671 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B0F19),
-      appBar: AppBar(
-        title: const Text(
-          'Health Tracker',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF0B0F19),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.white70),
-            onPressed: () {},
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User greeting banner
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: const Color(0xFF1E293B),
-                    child: const Icon(Icons.person, color: Color(0xFFEF4444), size: 28),
+  Widget _buildTrackerBody() {
+    return Column(
+      children: [
+        // Header Section
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Tracker',
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Welcome Back, User',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        'Keep monitoring your vitals',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withAlpha(150),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Dashboard stats grid
-              const Text(
-                'Latest Vitals',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white60,
                 ),
-              ),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.4,
-                children: [
-                  _buildStatCard(
-                    'Heart Rate',
-                    _latestHeartRate,
-                    Icons.favorite_rounded,
-                    const Color(0xFFEF4444),
-                  ),
-                  _buildStatCard(
-                    'Blood Pressure',
-                    _latestBloodPressure,
-                    Icons.speed_rounded,
-                    const Color(0xFF06B6D4),
-                  ),
-                  _buildStatCard(
-                    'Blood Sugar',
-                    _latestBloodSugar,
-                    Icons.water_drop_rounded,
-                    const Color(0xFFF59E0B),
-                  ),
-                  _buildStatCard(
-                    'Daily Steps',
-                    _latestSteps,
-                    Icons.directions_walk_rounded,
-                    const Color(0xFF10B981),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
-
-              // History list
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Recent Logs',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white60,
-                    ),
-                  ),
-                  Text(
-                    '${_records.length} records',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withAlpha(120),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _records.isEmpty ? 1 : _records.length,
-                itemBuilder: (context, index) {
-                  if (_records.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Text(
-                          'No health records logged yet.',
-                          style: TextStyle(color: Colors.white.withAlpha(100)),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final record = _records[index];
-                  return Card(
-                    color: const Color(0xFF1E293B),
-                    margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: record.iconColor.withAlpha(40),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          record.icon,
-                          color: record.iconColor,
-                        ),
-                      ),
-                      title: Text(
-                        record.type,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (record.note.isNotEmpty)
-                            Text(
-                              record.note,
-                              style: TextStyle(color: Colors.white.withAlpha(160)),
-                            ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${record.date.hour.toString().padLeft(2, '0')}:${record.date.minute.toString().padLeft(2, '0')} - '
-                            '${record.date.day}/${record.date.month}/${record.date.year}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withAlpha(100),
-                            ),
-                          ),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${record.value} ${record.unit}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: record.iconColor,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.white38),
-                            onPressed: () => _deleteRecord(record.id),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                _buildJewelIconButton(),
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFEF4444),
-        onPressed: _showAddRecordSheet,
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
+        // Main content container with rounded top corners
+        Expanded(
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F6F8), // Light grey background
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+              child: Column(
+                children: [
+                  // Lastest record card
+                  _buildLatestRecordCard(),
+                  const SizedBox(height: 16),
+                  // Blood Pressure Card
+                  _buildCategoryButton(
+                    title: 'Blood Pressure',
+                    color: const Color(0xFF1E8D89),
+                    icon: _buildBloodPressureIcon(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BloodPressureScreen(
+                          records: _records,
+                          onAddRecordTap: () => _showAddRecordSheet(initialType: 'Blood Pressure'),
+                        ),
+                      ),
+                    ).then((_) => setState(() {})),
+                  ),
+                  const SizedBox(height: 12),
+                  // Blood Sugar Card
+                  _buildCategoryButton(
+                    title: 'Blood Sugar',
+                    color: const Color(0xFFFA9314),
+                    icon: _buildBloodSugarIcon(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BloodSugarScreen(
+                          records: _records,
+                          onAddRecordTap: () => _showAddRecordSheet(initialType: 'Blood Sugar'),
+                        ),
+                      ),
+                    ).then((_) => setState(() {})),
+                  ),
+                  const SizedBox(height: 12),
+                  // Heart Rate Card
+                  _buildCategoryButton(
+                    title: 'Heart Rate',
+                    color: const Color(0xFFE54A4A),
+                    icon: _buildHeartRateIcon(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => HeartRateScreen(
+                          records: _records,
+                          onAddRecordTap: () => _showAddRecordSheet(initialType: 'Heart Rate'),
+                        ),
+                      ),
+                    ).then((_) => setState(() {})),
+                  ),
+                  const SizedBox(height: 12),
+                  // Weight & BMI Card
+                  _buildCategoryButton(
+                    title: 'Weight & BMI',
+                    color: const Color(0xFF1E7BFA),
+                    icon: _buildWeightBmiIcon(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => WeightBmiScreen(
+                          records: _records,
+                          onAddRecordTap: () => _showAddRecordSheet(initialType: 'Weight & BMI'),
+                        ),
+                      ),
+                    ).then((_) => setState(() {})),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget activeBody;
+    switch (_currentTabIndex) {
+      case 0:
+        activeBody = _buildTrackerBody();
+        break;
+      case 1:
+        activeBody = const InfoScreen();
+        break;
+      case 2:
+        activeBody = const SettingsScreen();
+        break;
+      default:
+        activeBody = _buildTrackerBody();
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFE53935), // Vibrant red background for header area
+      body: activeBody,
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            _buildNavItem(
+              icon: Icons.home_rounded,
+              label: 'Tracker',
+              isActive: _currentTabIndex == 0,
+              onTap: () => setState(() => _currentTabIndex = 0),
+            ),
+            _buildNavItem(
+              icon: Icons.chrome_reader_mode_outlined,
+              label: 'Info',
+              isActive: _currentTabIndex == 1,
+              onTap: () => setState(() => _currentTabIndex = 1),
+            ),
+            _buildNavItem(
+              icon: Icons.settings_rounded,
+              label: 'Settings',
+              isActive: _currentTabIndex == 2,
+              onTap: () => setState(() => _currentTabIndex = 2),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildJewelIconButton() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      width: 42,
+      height: 42,
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFFFEE58), // Gold/Yellow
+            Color(0xFFEC407A), // Pink/Rose
+            Color(0xFFAB47BC), // Purple
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(50),
+            color: Colors.black.withAlpha(30),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.diamond_rounded,
+          color: Color(0xFFFFD54F),
+          size: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLatestRecordCard() {
+    final latestRecord = _getLatestRecordOf(_selectedCategory);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
         ],
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
+              const Text(
+                'Lastest record',
                 style: TextStyle(
-                  fontSize: 14,
+                  color: Colors.black87,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white.withAlpha(180),
                 ),
               ),
-              Icon(icon, color: color, size: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F6F8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedCategory,
+                    dropdownColor: Colors.white,
+                    icon: const Icon(Icons.arrow_drop_down, color: Colors.black87),
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedCategory = newValue;
+                        });
+                      }
+                    },
+                    items: <String>[
+                      'Heart Rate',
+                      'Blood Pressure',
+                      'Blood Sugar',
+                      'Weight & BMI'
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
             ],
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          const SizedBox(height: 24),
+          Center(
+            child: latestRecord == null
+                ? const Text(
+                    'No record found.',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                : Column(
+                    children: [
+                      Text(
+                        '${latestRecord.value} ${latestRecord.unit}',
+                        style: TextStyle(
+                          color: latestRecord.iconColor,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Logged on ${latestRecord.date.day}/${latestRecord.date.month} at ${latestRecord.date.hour.toString().padLeft(2, '0')}:${latestRecord.date.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryButton({
+    required String title,
+    required Color color,
+    required Widget icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 96,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: color.withAlpha(60),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    final color = isActive ? const Color(0xFFE53935) : Colors.grey[500]!;
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (label == 'Tracker')
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(Icons.home_rounded, color: color, size: 28),
+                  Positioned(
+                    bottom: 5,
+                    child: Icon(Icons.favorite_rounded, color: Colors.white, size: 10),
+                  ),
+                  Positioned(
+                    bottom: 5,
+                    child: Icon(Icons.favorite_rounded, color: color, size: 8),
+                  ),
+                ],
+              )
+            else
+              Icon(icon, color: color, size: 28),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBloodPressureIcon() {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFF147A77).withAlpha(100),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.shield_rounded,
+              color: Color(0xFF4DB6AC),
+              size: 40,
+            ),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Container(
+              width: 44,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(40),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00ACC1),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '120',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[400],
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      Container(
+                        width: 16,
+                        height: 3,
+                        color: Colors.grey[300],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBloodSugarIcon() {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE67E22).withAlpha(80),
+              shape: BoxShape.circle,
+            ),
+          ),
+          Positioned(
+            left: 10,
+            bottom: 12,
+            child: Container(
+              width: 32,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C3E50),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white24, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(40),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(3),
+              child: Column(
+                children: [
+                  Container(
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFBDC3C7),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '95',
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: 12,
+            bottom: 14,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Icon(
+                  Icons.water_drop_rounded,
+                  color: Color(0xFFF1C40F),
+                  size: 26,
+                ),
+                Positioned(
+                  top: 8,
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeartRateIcon() {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(
+            Icons.favorite_rounded,
+            color: Colors.white.withAlpha(40),
+            size: 60,
+          ),
+          Icon(
+            Icons.favorite_rounded,
+            color: Colors.white.withAlpha(80),
+            size: 46,
+          ),
+          const Icon(
+            Icons.favorite_rounded,
+            color: Colors.white,
+            size: 32,
+          ),
+          Positioned(
+            child: Icon(
+              Icons.show_chart_rounded,
+              color: const Color(0xFFE54A4A),
+              size: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeightBmiIcon() {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E88E5).withAlpha(80),
+              shape: BoxShape.circle,
+            ),
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
               color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(40),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                )
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: CircularProgressIndicator(
+                      value: 0.7,
+                      strokeWidth: 4,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green[400]!),
+                      backgroundColor: Colors.grey[200],
+                    ),
+                  ),
+                ),
+                Transform.rotate(
+                  angle: -0.4,
+                  child: Align(
+                    alignment: const Alignment(0, -0.6),
+                    child: Container(
+                      width: 2,
+                      height: 18,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
