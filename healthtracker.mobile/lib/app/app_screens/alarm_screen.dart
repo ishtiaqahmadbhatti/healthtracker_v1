@@ -1,6 +1,6 @@
 // ignore_for_file: unused_element
 import 'package:flutter/material.dart';
-import 'blood_pressure_alarm_screen.dart';
+import 'vitals_alarm_screen.dart';
 
 class AlarmItem {
   final String title;
@@ -284,6 +284,13 @@ class _AlarmScreenState extends State<AlarmScreen> {
                     const SizedBox(height: 12),
                     _buildTypeItem(
                       context,
+                      title: 'Blood Sugar',
+                      icon: _buildBloodSugarDialogIcon(),
+                      onTap: () => _handleTypeSelected(context, 'Blood Sugar'),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildTypeItem(
+                      context,
                       title: 'Heart Rate',
                       icon: _buildHeartRateDialogIcon(),
                       onTap: () => _handleTypeSelected(context, 'Heart Rate'),
@@ -367,10 +374,35 @@ class _AlarmScreenState extends State<AlarmScreen> {
   void _handleTypeSelected(BuildContext context, String type) async {
     Navigator.of(context).pop();
     
-    if (type == 'Blood Pressure') {
+    if (type == 'Blood Pressure' || 
+        type == 'Blood Sugar' || 
+        type == 'Heart Rate' || 
+        type == 'Medicine' || 
+        type == 'Custom') {
+        
+      final VitalAlarmType vitalType;
+      switch (type) {
+        case 'Blood Pressure':
+          vitalType = VitalAlarmType.bloodPressure;
+          break;
+        case 'Blood Sugar':
+          vitalType = VitalAlarmType.bloodSugar;
+          break;
+        case 'Heart Rate':
+          vitalType = VitalAlarmType.heartRate;
+          break;
+        case 'Medicine':
+          vitalType = VitalAlarmType.medicine;
+          break;
+        case 'Custom':
+        default:
+          vitalType = VitalAlarmType.custom;
+          break;
+      }
+
       final result = await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const BloodPressureAlarmScreen(),
+          builder: (context) => VitalsAlarmScreen(type: vitalType),
         ),
       );
       
@@ -379,11 +411,6 @@ class _AlarmScreenState extends State<AlarmScreen> {
           _alarms.add(result);
         });
       }
-    } else {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected type: $type')),
-      );
     }
   }
 
@@ -398,6 +425,22 @@ class _AlarmScreenState extends State<AlarmScreen> {
       child: const Icon(
         Icons.health_and_safety_rounded,
         color: Color(0xFF1E8D89),
+        size: 24,
+      ),
+    );
+  }
+
+  Widget _buildBloodSugarDialogIcon() {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: const Color(0xFF9C27B0).withAlpha(40),
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.water_drop_rounded,
+        color: Color(0xFF9C27B0),
         size: 24,
       ),
     );

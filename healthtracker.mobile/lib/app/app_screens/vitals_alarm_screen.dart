@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'alarm_screen.dart';
 
-class BloodPressureAlarmScreen extends StatefulWidget {
-  const BloodPressureAlarmScreen({super.key});
+enum VitalAlarmType { bloodPressure, bloodSugar, heartRate, medicine, custom }
+
+class VitalsAlarmScreen extends StatefulWidget {
+  final VitalAlarmType type;
+
+  const VitalsAlarmScreen({
+    super.key,
+    required this.type,
+  });
 
   @override
-  State<BloodPressureAlarmScreen> createState() => _BloodPressureAlarmScreenState();
+  State<VitalsAlarmScreen> createState() => _VitalsAlarmScreenState();
 }
 
-class _BloodPressureAlarmScreenState extends State<BloodPressureAlarmScreen> {
-  final _titleController = TextEditingController(text: "It's time to measure your blood pressure.");
-  final _descController = TextEditingController(text: "Make sure to take your measurements before taking your medication.");
+class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _descController;
   
   final List<TimeOfDay> _times = [];
   final List<bool> _repeatDays = [true, true, true, true, true, true, false]; // S, M, T, W, T, F, S
@@ -19,6 +26,33 @@ class _BloodPressureAlarmScreenState extends State<BloodPressureAlarmScreen> {
   DateTime _startDate = DateTime(2026, 6, 28);
   DateTime _endDate = DateTime(2026, 6, 28);
   bool _neverEnd = true;
+
+  @override
+  void initState() {
+    super.initState();
+    switch (widget.type) {
+      case VitalAlarmType.bloodPressure:
+        _titleController = TextEditingController(text: "It's time to measure your blood pressure.");
+        _descController = TextEditingController(text: "Make sure to take your measurements before taking your medication.");
+        break;
+      case VitalAlarmType.bloodSugar:
+        _titleController = TextEditingController(text: "Time to measure your Blood Sugar.");
+        _descController = TextEditingController(text: "Take your measurements before meals or as directed by your doctor.");
+        break;
+      case VitalAlarmType.heartRate:
+        _titleController = TextEditingController(text: "Time to measure your Heart Rate.");
+        _descController = TextEditingController(text: "Remember to take your measurements before you take your medicines.");
+        break;
+      case VitalAlarmType.medicine:
+        _titleController = TextEditingController(text: "Time to take your medication.");
+        _descController = TextEditingController(text: "Take with water after food or according to your prescription.");
+        break;
+      case VitalAlarmType.custom:
+        _titleController = TextEditingController(text: "Alarm reminder.");
+        _descController = TextEditingController(text: "Set custom details for this alarm.");
+        break;
+    }
+  }
 
   @override
   void dispose() {
@@ -136,15 +170,30 @@ class _BloodPressureAlarmScreenState extends State<BloodPressureAlarmScreen> {
         ? _formatTimeOfDay(_times.first) 
         : "08:00 AM";
 
+    final Widget vitalIcon;
+    switch (widget.type) {
+      case VitalAlarmType.bloodPressure:
+        vitalIcon = const Icon(Icons.health_and_safety_rounded, color: Color(0xFF1E8D89), size: 32);
+        break;
+      case VitalAlarmType.bloodSugar:
+        vitalIcon = const Icon(Icons.water_drop_rounded, color: Color(0xFF9C27B0), size: 32);
+        break;
+      case VitalAlarmType.heartRate:
+        vitalIcon = const Icon(Icons.favorite_rounded, color: Color(0xFFE54A4A), size: 32);
+        break;
+      case VitalAlarmType.medicine:
+        vitalIcon = const Icon(Icons.vaccines_rounded, color: Color(0xFFFA9314), size: 32);
+        break;
+      case VitalAlarmType.custom:
+        vitalIcon = const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E7BFA), size: 32);
+        break;
+    }
+
     final AlarmItem newItem = AlarmItem(
       title: _titleController.text.trim(),
       frequency: frequency,
       nextExecution: "Next, ${_formatDate(_startDate)}\n$nextTimeStr",
-      icon: const Icon(
-        Icons.health_and_safety_rounded,
-        color: Color(0xFF1E8D89),
-        size: 32,
-      ),
+      icon: vitalIcon,
       isEnabled: true,
     );
 
@@ -153,6 +202,38 @@ class _BloodPressureAlarmScreenState extends State<BloodPressureAlarmScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final String screenTitle;
+    final String assetPath;
+    final Widget fallbackIcon;
+
+    switch (widget.type) {
+      case VitalAlarmType.bloodPressure:
+        screenTitle = 'Blood Pressure';
+        assetPath = 'assets/images/bp.png';
+        fallbackIcon = const Icon(Icons.health_and_safety_rounded, color: Color(0xFF1E8D89), size: 48);
+        break;
+      case VitalAlarmType.bloodSugar:
+        screenTitle = 'Blood Sugar';
+        assetPath = 'assets/images/blood_sugar.png';
+        fallbackIcon = const Icon(Icons.water_drop_rounded, color: Color(0xFF9C27B0), size: 48);
+        break;
+      case VitalAlarmType.heartRate:
+        screenTitle = 'Heart Rate';
+        assetPath = 'assets/images/heart_rate.png';
+        fallbackIcon = const Icon(Icons.favorite_rounded, color: Color(0xFFE54A4A), size: 48);
+        break;
+      case VitalAlarmType.medicine:
+        screenTitle = 'Medicine';
+        assetPath = 'assets/images/medicine.png';
+        fallbackIcon = const Icon(Icons.vaccines_rounded, color: Color(0xFFFA9314), size: 48);
+        break;
+      case VitalAlarmType.custom:
+        screenTitle = 'Custom';
+        assetPath = 'assets/images/custom.png';
+        fallbackIcon = const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E7BFA), size: 48);
+        break;
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFE53935), // Header background
       body: Column(
@@ -169,9 +250,9 @@ class _BloodPressureAlarmScreenState extends State<BloodPressureAlarmScreen> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Blood Pressure',
-                    style: TextStyle(
+                  Text(
+                    screenTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -206,15 +287,10 @@ class _BloodPressureAlarmScreenState extends State<BloodPressureAlarmScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Image.asset(
-                    'assets/images/bp.png',
+                    assetPath,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      // Fallback graphic icon if file doesn't exist
-                      return const Icon(
-                        Icons.health_and_safety_rounded,
-                        color: Color(0xFF1E8D89),
-                        size: 48,
-                      );
+                      return fallbackIcon;
                     },
                   ),
                 ),
