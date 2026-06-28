@@ -1,5 +1,6 @@
 // ignore_for_file: unused_element
 import 'package:flutter/material.dart';
+import 'blood_pressure_alarm_screen.dart';
 
 class AlarmItem {
   final String title;
@@ -363,11 +364,27 @@ class _AlarmScreenState extends State<AlarmScreen> {
     );
   }
 
-  void _handleTypeSelected(BuildContext context, String type) {
+  void _handleTypeSelected(BuildContext context, String type) async {
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Selected type: $type')),
-    );
+    
+    if (type == 'Blood Pressure') {
+      final result = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const BloodPressureAlarmScreen(),
+        ),
+      );
+      
+      if (result is AlarmItem) {
+        setState(() {
+          _alarms.add(result);
+        });
+      }
+    } else {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Selected type: $type')),
+      );
+    }
   }
 
   Widget _buildBpDialogIcon() {
