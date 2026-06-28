@@ -3,6 +3,7 @@ import 'language_screen.dart';
 import 'feedback_screen.dart';
 import 'export_report_screen.dart';
 import 'package:file_picker/file_picker.dart';
+import 'alarm_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -81,7 +82,13 @@ class SettingsScreen extends StatelessWidget {
                               icon: const Icon(Icons.alarm_rounded, color: Colors.black87, size: 24),
                               title: 'Set Alarm',
                               hasChevron: true,
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const AlarmScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _buildDivider(),
                             _buildSettingsItem(
