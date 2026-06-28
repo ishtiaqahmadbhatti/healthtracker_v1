@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'language_screen.dart';
 import 'feedback_screen.dart';
+import 'export_report_screen.dart';
+import 'package:file_picker/file_picker.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -85,13 +87,19 @@ class SettingsScreen extends StatelessWidget {
                             _buildSettingsItem(
                               icon: const Icon(Icons.ios_share_rounded, color: Colors.black87, size: 24),
                               title: 'Export report',
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const ExportReportScreen(),
+                                  ),
+                                );
+                              },
                             ),
                             _buildDivider(),
                             _buildSettingsItem(
                               icon: const Icon(Icons.folder_open_rounded, color: Colors.black87, size: 24),
                               title: 'Import data',
-                              onTap: () {},
+                              onTap: () => _showImportDataSheet(context),
                             ),
                           ],
                         ),
@@ -260,5 +268,231 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showImportDataSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Choose File to Import',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.black54),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                
+                // Mock files list
+                _buildMockFileItem(
+                  context,
+                  fileName: 'health_data_backup_202606.json',
+                  fileSize: '42 KB',
+                ),
+                const SizedBox(height: 12),
+                _buildMockFileItem(
+                  context,
+                  fileName: 'healthtracker_export.csv',
+                  fileSize: '12 KB',
+                ),
+                const SizedBox(height: 12),
+                _buildMockFileItem(
+                  context,
+                  fileName: 'my_health_records.json',
+                  fileSize: '188 KB',
+                ),
+                const SizedBox(height: 20),
+                
+                // Browse button
+                GestureDetector(
+                  onTap: () => _browseFileFromDevice(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFE53935),
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color(0xFFFFEBEE),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.folder_open_rounded, color: Color(0xFFE53935)),
+                        SizedBox(width: 8),
+                        Text(
+                          'Browse other file from device',
+                          style: TextStyle(
+                            color: Color(0xFFE53935),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+  }
+
+  Widget _buildMockFileItem(
+    BuildContext context, {
+    required String fileName,
+    required String fileSize,
+  }) {
+    return GestureDetector(
+      onTap: () => _simulateFileImport(context, fileName),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F6F8),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.insert_drive_file_rounded, color: Colors.grey, size: 36),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    fileName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    fileSize,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.black45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.download_rounded, color: Color(0xFFE53935), size: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _simulateFileImport(BuildContext context, String fileName) {
+    // Pop choose file sheet
+    Navigator.of(context).pop();
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE53935)),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: Text(
+                    'Importing $fileName...',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    // Simulate import processing time
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (!context.mounted) return;
+      
+      // Dismiss dialog
+      Navigator.of(context).pop();
+
+      // Show success SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$fileName imported successfully! 14 records loaded.'),
+          backgroundColor: Colors.green[700],
+        ),
+      );
+    });
+  }
+
+  Future<void> _browseFileFromDevice(BuildContext context) async {
+    try {
+      // Pop the choose file sheet
+      Navigator.of(context).pop();
+
+      // Pick file using file_picker
+      final FilePickerResult? result = await FilePicker.pickFiles(
+        type: FileType.any,
+      );
+
+      if (result != null && result.files.single.name.isNotEmpty) {
+        final String fileName = result.files.single.name;
+        if (!context.mounted) return;
+        _simulateFileImport(context, fileName);
+      } else {
+        // User canceled the picker
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File selection cancelled.')),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error choosing file: $e')),
+      );
+    }
   }
 }
