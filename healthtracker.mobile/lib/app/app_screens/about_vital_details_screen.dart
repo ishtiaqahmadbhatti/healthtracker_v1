@@ -140,10 +140,11 @@ class AboutVitalDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildSectionCard(ArticleSection section) {
+    final headerColor = _getSectionHeaderColor(section.title);
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -155,28 +156,121 @@ class AboutVitalDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias, // Clip the colored banner header
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            section.title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+          if (headerColor != null)
+            Container(
+              width: double.infinity,
+              color: headerColor,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Text(
+                section.title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Text(
+                section.title,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            section.body,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
-              height: 1.4,
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  section.body,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                    height: 1.4,
+                  ),
+                ),
+                if (section.title == 'Understanding Blood Pressure Categories') ...[
+                  const SizedBox(height: 16),
+                  _buildBpCategoriesList(),
+                ],
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Color? _getSectionHeaderColor(String title) {
+    if (title.contains('1. Hypotension')) return const Color(0xFF2979FF); // Blue
+    if (title.contains('2. Normal')) return const Color(0xFF4CAF50); // Green
+    if (title.contains('3. Elevated')) return const Color(0xFFFFD54F); // Yellow/Amber
+    if (title.contains('4. High Blood Pressure - Stage 1')) return const Color(0xFFFF9100); // Light Orange
+    if (title.contains('5. High Blood Pressure - Stage 2')) return const Color(0xFFFF3D00); // Dark Orange
+    if (title.contains('6. Dangerously')) return const Color(0xFFD50000); // Red
+    return null;
+  }
+
+  Widget _buildBpCategoriesList() {
+    final categories = [
+      _BpCategoryData('Hypotension', '<90/60 or DIA <60 mmHg', const Color(0xFFE3F2FD), const Color(0xFF1E88E5)),
+      _BpCategoryData('Normal', 'SYS <120 and DIA <80 mmHg', const Color(0xFFE8F5E9), const Color(0xFF43A047)),
+      _BpCategoryData('Elevated', 'SYS 120-129 and DIA <80 mmHg', const Color(0xFFFFFDE7), const Color(0xFFFDD835)),
+      _BpCategoryData('High Pressure Stage 1', 'SYS 130-139 or DIA 80-89 mmHg', const Color(0xFFFFF3E0), const Color(0xFFFB8C00)),
+      _BpCategoryData('High Pressure Stage 2', 'SYS >=140 or DIA >=90 mmHg', const Color(0xFFFBE9E7), const Color(0xFFF4511E)),
+      _BpCategoryData('Hypertensive Crisis', 'SYS >180 or DIA >120 mmHg', const Color(0xFFFFEBEE), const Color(0xFFE53935)),
+    ];
+
+    return Column(
+      children: categories.map((cat) {
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: cat.bgColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(180),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  cat.name,
+                  style: TextStyle(
+                    color: cat.textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                cat.valueRange,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -287,4 +381,13 @@ class AboutVitalDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _BpCategoryData {
+  final String name;
+  final String valueRange;
+  final Color bgColor;
+  final Color textColor;
+
+  _BpCategoryData(this.name, this.valueRange, this.bgColor, this.textColor);
 }

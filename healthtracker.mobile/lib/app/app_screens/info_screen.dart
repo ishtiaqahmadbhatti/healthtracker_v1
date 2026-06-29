@@ -35,12 +35,32 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFF00E676), const Color(0xFF388E3C)],
         sections: [
           ArticleSection(
-            title: 'Blood Pressure Categories',
-            body: 'Blood pressure is classified into categories ranging from Normal to Hypertensive Crisis. A normal reading is less than 120/80 mmHg. Elevated is between 120-129 systolic, and Stage 1 Hypertension is 130-139 systolic or 80-89 diastolic. Understanding your numbers is key to taking action.',
+            title: 'Understanding Blood Pressure Categories',
+            body: 'To determine your blood pressure category, you can refer to the following:',
           ),
           ArticleSection(
-            title: 'Systolic vs. Diastolic',
-            body: 'The top number (systolic) measures the pressure in your blood vessels when your heart beats. The bottom number (diastolic) measures the pressure in your blood vessels when your heart rests between beats. Both numbers are critical to health monitoring.',
+            title: '1. Hypotension',
+            body: 'If your blood pressure readings are consistently below 90/60 mmHg, you may have hypotension. Typically, low blood pressure causes no harm and shows no symptoms. However, if you experience sudden drops of it (more than 20 mmHg), sudden drops due to medication, or symptoms such as dizziness, fainting, or fatigue, seek treatment.',
+          ),
+          ArticleSection(
+            title: '2. Normal Blood Pressure',
+            body: 'Blood pressure readings below 120/80 mmHg are considered normal. If your results fall into this category, maintain a lean healthy lifestyle by following a balanced diet and exercising regularly.',
+          ),
+          ArticleSection(
+            title: '3. Elevated Blood Pressure',
+            body: 'Elevated blood pressure refers to sustained readings ranging from 120–129 systolic and less than 80 mmHg diastolic. People with elevated blood pressure are at risk of developing high blood pressure unless they take steps to control the condition.',
+          ),
+          ArticleSection(
+            title: '4. High Blood Pressure - Stage 1',
+            body: 'Hypertension Stage 1 occurs when blood pressure consistently ranges from 130–139 systolic or 80–89 mmHg diastolic. At this stage, doctors may prescribe lifestyle changes and consider adding blood pressure medication based on the patient\'s risk of atherosclerotic cardiovascular disease (ASCVD), such as heart attack or stroke.',
+          ),
+          ArticleSection(
+            title: '5. High Blood Pressure - Stage 2',
+            body: 'Hypertension Stage 2 is when blood pressure consistently ranges at 140/90 mmHg or higher. At this stage, doctors are likely to prescribe a combination of blood pressure medications and lifestyle changes to manage the condition.',
+          ),
+          ArticleSection(
+            title: '6. Dangerously High Blood Pressure',
+            body: 'Medical attention is necessary for this stage of high blood pressure. If your blood pressure readings suddenly exceed 180/120 mmHg, wait for five minutes and then measure your blood pressure again. If your readings are still unusually high, immediately contact your doctor, as you may be experiencing a hypertensive crisis.',
           ),
         ],
       ),
