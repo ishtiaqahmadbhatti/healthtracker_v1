@@ -187,12 +187,12 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFF26A69A), const Color(0xFF00695C)],
         sections: [
           ArticleSection(
-            title: 'Core Principles of DASH',
-            body: 'The DASH diet is rich in vegetables, fruits, whole grains, and low-fat dairy products. It includes fish, poultry, beans, and nuts, while limiting saturated fats, red meats, and sugary beverages.',
+            title: 'What is DASH?',
+            body: 'DASH stands for Dietary Approaches to Stop Hypertension. This eating regimen was based on research studies funded by the National Heart, Lung, and Blood Institute (NHLBI) which demonstrated how DASH can decrease high blood pressure and raise cholesterol levels. By following the DASH diet, you are less likely to develop heart disease.',
           ),
           ArticleSection(
-            title: 'Sodium Reduction Targets',
-            body: 'Standard DASH limits sodium to 2,300 mg per day, while the lower-sodium version restricts intake to 1,500 mg per day, which has been shown to reduce blood pressure even further.',
+            title: 'The DASH diet plan:',
+            body: '- Emphasizes fruits, vegetables, and whole grains.\n\n- Includes fat-free or low-fat dairy products, fish, poultry, beans, nuts, and vegetable oils.\n\n- Limits the consumption of foods high in saturated fat such as fatty meats, dairy items with all the fat, and tropical oils like coconut, palm kernel, and palm oils.\n\n- Sets limits on foods and drinks with added sugar.\n\nIn addition to the DASH diet, other lifestyle modifications such as maintaining a healthy weight, exercising regularly, and quitting smoking can also help to lower your blood pressure.',
           ),
         ],
       ),
