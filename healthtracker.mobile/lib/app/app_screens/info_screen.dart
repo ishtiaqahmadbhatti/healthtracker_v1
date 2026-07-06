@@ -207,12 +207,16 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFFBA68C8), const Color(0xFF7B1FA2)],
         sections: [
           ArticleSection(
-            title: 'What is diabetes?',
-            body: 'Diabetes is a chronic condition where the body cannot properly process glucose (sugar) from food. This happens either because the pancreas does not produce enough insulin, or the body cannot effectively use the insulin it produces. Over time, high blood glucose levels can lead to serious health complications affecting the heart, blood vessels, eyes, kidneys, and nerves.',
+            title: '',
+            body: 'The chronic disease known as diabetes mellitus is a serious and complex condition without a cure. Once diagnosed, individuals must manage it for life. To learn important information about this disease, continue reading.',
           ),
           ArticleSection(
-            title: 'Types of Diabetes',
-            body: 'Type 1 Diabetes: An autoimmune reaction where the body stops making insulin. It is usually diagnosed in children and young adults.\n\nType 2 Diabetes: The most common type, where the body does not use insulin well and cannot keep blood sugar at normal levels. It develops over many years and is closely linked to lifestyle factors.\n\nGestational Diabetes: Develops in pregnant women who have never had diabetes, and usually goes away after delivery but increases the risk of type 2 diabetes later.',
+            title: 'What exactly is diabetes?',
+            body: 'High blood sugar levels in the body is caused by diabetes, a metabolic disease resulting from various factors such as insulin deficiency and insulin resistance.\n\nFood consumption leads to the entry of sugar into the bloodstream, and insulin, which is secreted by the pancreas, plays a crucial role in removing sugar from the bloodstream and converting it into energy for the body.\n\nThe function of insulin is to facilitate the transfer of sugar into cells instead of the bloodstream, where it can be converted into the energy that the body needs.\n\nHowever, in individuals with diabetes, the body cannot effectively convert sugar into energy due to inadequate insulin levels or dysfunctional insulin production, leading to high blood sugar levels.',
+          ),
+          ArticleSection(
+            title: 'How widespread is diabetes?',
+            body: 'A prevalent and chronic disease affecting a significant number of individuals is diabetes. In 2018, the American Diabetes Association reported that one in ten Americans had diabetes, while the British Diabetic Association found that one in fifteen people in the UK were affected by the disease.\n\nDiabetes is becoming increasingly common. Type 2 diabetes is the fastest growing of the three types of diabetes (type 1, type 2, and gestational diabetes).',
           ),
         ],
       ),
@@ -223,12 +227,16 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFF29B6F6), const Color(0xFF0288D1)],
         sections: [
           ArticleSection(
-            title: 'Fasting Blood Sugar Ranges',
-            body: 'For someone without diabetes, a normal fasting blood sugar level is typically under 100 mg/dL (5.6 mmol/L). A level between 100 and 125 mg/dL indicates prediabetes, while 126 mg/dL or higher on two separate tests indicates diabetes.',
+            title: '',
+            body: 'Understanding the normal blood sugar levels is a crucial aspect of self-managing diabetes. Blood sugar ranges may vary depending on the situation and age group, such as before or after a meal, in children or adults, or during fasting. The blood sugar target range is the one individuals with diabetes strive to maintain as much as possible. This article will provide an overview of both the typical blood sugar ranges and the blood sugar goals for those with diabetes.',
           ),
           ArticleSection(
-            title: 'Post-Meal Blood Sugar Ranges',
-            body: 'A normal blood sugar level two hours after eating is typically less than 140 mg/dL (7.8 mmol/L). For people with diabetes, the target post-meal level is usually less than 180 mg/dL, though targets are individualized based on age and overall health status.',
+            title: 'Adults Blood Sugar Ranges',
+            body: 'Normal Ranges\n\nBlood sugar levels that are considered normal for adults according to diabetes.co.uk and American Diabetes are as follows:\n\n- Prior to meals or during a period of fasting: between 4.0 and 5.9 mmol/L (72 to 106 mg/dL).\n- At least 90 minutes after a meal: less than 7.8 mmol/L (140 mg/dL).\n\nDiabetic Ranges\n\nTo maintain healthy blood sugar levels, adults with diabetes should aim for the following ranges:\n\nType 1 diabetes:\n- Upon waking: between 5.0 and 7.0 mmol/L (90 to 126 mg/dL).\n- Before meals or during a period of fasting: between 4.0 and 7.0 mmol/L (72 to 126 mg/dL).\n- 90 minutes or more after a meal: between 5.0 and 9.0 mmol/L (90 to 162 mg/dL).\n\nType 2 diabetes:\n- Prior to meals or during a period of fasting: between 4.0 and 7.0 mmol/L (72 to 126 mg/dL).\n- 90 minutes or more after a meal: under 8.5 mmol/L (153 mg/dL).',
+          ),
+          ArticleSection(
+            title: 'Children Blood Sugar Ranges',
+            body: 'Children\'s normal blood sugar levels under 6:\n- 4.0 to 11.1 mmol/L (72 to 200 mg/dL) each day.\n\nFor children between the ages of 6 and 12, the normal blood sugar level range is:\n- During a period of fasting: between 4.5 and 10 mmol/L (80 to 180 mg/dL).\n- Prior to meals: between 5 and 10 mmol/L (90 to 180 mg/dL).\n- Between one and two hours after meals: under 7.8 mmol/L (140 mg/dL).\n\nFor teenagers between the ages of 13 and 19, the normal blood sugar level range is:\n- During a period of fasting: between 3.9 and 8.3 mmol/L (70 to 150 mg/dL).\n- Prior to meals: between 5 and 7.2 mmol/L (90 to 130 mg/dL).\n- Between one and two hours after meals: under 7.8 mmol/L (140 mg/dL).\n\nIn addition to normal and diabetic blood sugar limits, hypoglycemia can occur when blood sugar levels drop below 3.89 mmol/L (70 mg/dL). However, symptoms only appear when blood sugar levels drop below 3 mmol/L (55 mg/dL).\n\nIt is important to note that the blood sugar level goals mentioned above may not be suitable for individuals with other health conditions or circumstances. Therefore, it is important to discuss your goals with your healthcare provider.',
           ),
         ],
       ),
