@@ -247,12 +247,16 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFFFF8A65), const Color(0xFFD84315)],
         sections: [
           ArticleSection(
-            title: 'Common Warning Symptoms',
-            body: 'Early signs of diabetes may seem harmless but should never be ignored. They include:\n\n- Polyuria (Frequent urination)\n- Polydipsia (Excessive thirst)\n- Polyphagia (Extreme hunger)\n- Unexplained weight loss\n- Fatigue and irritability\n- Blurry vision\n- Slow-healing sores or cuts\n- Frequent infections',
+            title: '',
+            body: 'Early identification of diabetes can reduce the likelihood of serious complications. Therefore, it is crucial to understand the primary indicators of diabetes. Here are some examples of common diabetic symptoms for your reference.',
           ),
           ArticleSection(
-            title: 'When to Consult a Doctor',
-            body: 'If you or a family member experiences any of these symptoms persistently, scheduling a simple blood test with your healthcare provider is highly recommended. Early detection and management can prevent damage to vital organs.',
+            title: 'What are the primary diabetic symptoms?',
+            body: 'If you have type 1 diabetes, you will experience acute, life-threatening symptoms, which can be easily identified.\n\nHowever, symptoms of type 2 diabetes may take several years to appear or not show any symptoms at all. If you are experiencing the following signs, you may already have diabetic problems.',
+          ),
+          ArticleSection(
+            title: 'Some common symptoms of diabetes include:',
+            body: '- Genital itching or thrush\n\n- Slow-healing cuts\n\n- Weight gain over time (Type 2)\n\n- Unintentional weight loss (Type 1)\n\n- Frequent urination, especially at night.\n\n- Numbness and tingling in the hands and feet (Type 2)\n\nGestational diabetes during pregnancy is often asymptomatic, but routine prenatal screenings between weeks 24 and 28 can detect the condition.\n\nMen with diabetes may also experience erectile dysfunction (ED), reduced libido, and weak muscles, while women may be prone to urinary tract infections (UTIs), yeast infections, and dry, itchy skin.',
           ),
         ],
       ),
