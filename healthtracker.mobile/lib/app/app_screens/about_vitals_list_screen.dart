@@ -37,10 +37,27 @@ class AboutVitalsListScreen extends StatelessWidget {
     required this.articles,
   });
 
+  Color _getHeaderColor() {
+    if (vitalName.toLowerCase().contains('pressure')) {
+      return const Color(0xFFE53935); // BP Red
+    }
+    if (vitalName.toLowerCase().contains('sugar')) {
+      return const Color(0xFFFA9314); // Blood Sugar Amber
+    }
+    if (vitalName.toLowerCase().contains('heart') || vitalName.toLowerCase().contains('pulse')) {
+      return const Color(0xFFEC407A); // Heart Rate Pink
+    }
+    if (vitalName.toLowerCase().contains('weight') || vitalName.toLowerCase().contains('bmi')) {
+      return const Color(0xFF5C6BC0); // Weight/BMI Indigo
+    }
+    return const Color(0xFF1E8D89); // Default Teal
+  }
+
   @override
   Widget build(BuildContext context) {
+    final headerColor = _getHeaderColor();
     return Scaffold(
-      backgroundColor: const Color(0xFF1E8D89), // Vitals Teal background
+      backgroundColor: headerColor,
       body: Column(
         children: [
           // AppBar / Header Section

@@ -201,78 +201,98 @@ class InfoScreen extends StatelessWidget {
     // Dynamic articles list for Blood Sugar (6 contents)
     final sugarArticles = [
       ArticleItem(
-        title: 'Understanding Blood Sugar',
-        description: 'Glucose is the main source of energy for your body, but keeping it in the target range is essential to avoid diabetes complications.',
-        icon: Icons.water_drop_rounded,
+        title: 'Understand diabetes',
+        description: 'The chronic disease known as diabetes mellitus is a serious and complex condition without a cure, but it can be managed.',
+        icon: Icons.health_and_safety_rounded,
         gradientColors: [const Color(0xFFBA68C8), const Color(0xFF7B1FA2)],
         sections: [
           ArticleSection(
-            title: 'What is Glucose?',
-            body: 'Glucose is the main source of energy for your body\'s cells. When you eat, carbohydrates are broken down into glucose, which enters your bloodstream. Monitoring target ranges prevents spikes and crashes.',
+            title: 'What is diabetes?',
+            body: 'Diabetes is a chronic condition where the body cannot properly process glucose (sugar) from food. This happens either because the pancreas does not produce enough insulin, or the body cannot effectively use the insulin it produces. Over time, high blood glucose levels can lead to serious health complications affecting the heart, blood vessels, eyes, kidneys, and nerves.',
           ),
           ArticleSection(
-            title: 'Why It Matters',
-            body: 'Consistently high blood sugar can damage blood vessels and nerves over time, increasing the risk of heart disease, kidney problems, and vision loss.',
+            title: 'Types of Diabetes',
+            body: 'Type 1 Diabetes: An autoimmune reaction where the body stops making insulin. It is usually diagnosed in children and young adults.\n\nType 2 Diabetes: The most common type, where the body does not use insulin well and cannot keep blood sugar at normal levels. It develops over many years and is closely linked to lifestyle factors.\n\nGestational Diabetes: Develops in pregnant women who have never had diabetes, and usually goes away after delivery but increases the risk of type 2 diabetes later.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Symptoms of High Sugar Levels',
-        description: 'Common symptoms of high blood sugar (hyperglycemia) include increased thirst, frequent urination, and fatigue.',
+        title: 'Understand the normal range for blood sugar',
+        description: 'Understanding the typical blood sugar levels is a crucial aspect of self-managing diabetes. Blood sugar ranges help guide treatment decisions.',
+        icon: Icons.speed_rounded,
+        gradientColors: [const Color(0xFF29B6F6), const Color(0xFF0288D1)],
+        sections: [
+          ArticleSection(
+            title: 'Fasting Blood Sugar Ranges',
+            body: 'For someone without diabetes, a normal fasting blood sugar level is typically under 100 mg/dL (5.6 mmol/L). A level between 100 and 125 mg/dL indicates prediabetes, while 126 mg/dL or higher on two separate tests indicates diabetes.',
+          ),
+          ArticleSection(
+            title: 'Post-Meal Blood Sugar Ranges',
+            body: 'A normal blood sugar level two hours after eating is typically less than 140 mg/dL (7.8 mmol/L). For people with diabetes, the target post-meal level is usually less than 180 mg/dL, though targets are individualized based on age and overall health status.',
+          ),
+        ],
+      ),
+      ArticleItem(
+        title: 'Diabetes\'s Primary Warning Signs',
+        description: 'Early identification of diabetes can reduce the likelihood of serious complications. Therefore, it is crucial to recognize warning symptoms.',
         icon: Icons.warning_amber_rounded,
         gradientColors: [const Color(0xFFFF8A65), const Color(0xFFD84315)],
         sections: [
           ArticleSection(
-            title: 'Recognizing Hyperglycemia',
-            body: 'Key indicators include extreme thirst, dry mouth, frequent urination, blurry vision, and feeling unusually tired or lethargic.',
+            title: 'Common Warning Symptoms',
+            body: 'Early signs of diabetes may seem harmless but should never be ignored. They include:\n\n- Polyuria (Frequent urination)\n- Polydipsia (Excessive thirst)\n- Polyphagia (Extreme hunger)\n- Unexplained weight loss\n- Fatigue and irritability\n- Blurry vision\n- Slow-healing sores or cuts\n- Frequent infections',
+          ),
+          ArticleSection(
+            title: 'When to Consult a Doctor',
+            body: 'If you or a family member experiences any of these symptoms persistently, scheduling a simple blood test with your healthcare provider is highly recommended. Early detection and management can prevent damage to vital organs.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Healthy Diet for Glycemic Control',
-        description: 'Limiting high-glycemic index foods and focusing on fiber-rich vegetables, lean proteins, and whole grains stabilizes blood glucose.',
-        icon: Icons.restaurant_menu_rounded,
+        title: 'Blood Sugar Checking at Home',
+        description: 'Blood sugar self-testing can be particularly beneficial for the elderly and those with diabetes. Testing regularly keeps track of blood sugar changes.',
+        icon: Icons.home_work_rounded,
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF2E7D32)],
         sections: [
           ArticleSection(
-            title: 'Low Glycemic Index Diet',
-            body: 'Focusing on complex carbohydrates like oats, quinoa, legumes, and green vegetables ensures slower digestion, preventing steep glucose spikes.',
+            title: 'Why Monitor at Home?',
+            body: 'Self-monitoring provides real-time information about your blood glucose levels. It helps you see how meals, physical activity, stress, and medications affect your sugar levels. This enables you and your healthcare team to make necessary adjustments to your treatment plan.',
           ),
-        ],
-      ),
-      ArticleItem(
-        title: 'Exercise and Glucose Metabolism',
-        description: 'Physical activity helps your muscles use blood glucose for energy, lowering your overall blood sugar levels effectively.',
-        icon: Icons.directions_bike_rounded,
-        gradientColors: [const Color(0xFF29B6F6), const Color(0xFF0288D1)],
-        sections: [
           ArticleSection(
-            title: 'Insulin Sensitivity Benefits',
-            body: 'Exercise helps insulin work more efficiently. Regular workouts can keep your blood sugar lower for up to 24 hours after physical activity.',
+            title: 'Steps for Accurate Checking',
+            body: '1. Wash your hands thoroughly with warm water and soap.\n2. Insert a test strip into your blood glucose meter.\n3. Prick the side of your finger with the lancing device.\n4. Apply the blood drop to the edge of the test strip.\n5. Wait for the meter to display your results and record the reading.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Checking Your Vitals: Sugar Monitoring Tips',
-        description: 'Consistent monitoring with a glucometer before and after meals gives valuable insights into how food and activity affect your sugar.',
+        title: 'Methods for Diagnosing Diabetes',
+        description: 'How is diabetes diagnosed? Doctors use blood tests to diagnose and treat diabetes. Typical testing protocols include A1C, fasting, and oral tests.',
         icon: Icons.biotech_rounded,
         gradientColors: [const Color(0xFF26A69A), const Color(0xFF00695C)],
         sections: [
           ArticleSection(
-            title: 'Timing and Recording Readings',
-            body: 'Test fasting levels upon waking, and post-prandial levels 2 hours after the start of a meal. Log these variables to discuss with your physician.',
+            title: 'Standard Diagnostic Tests',
+            body: 'Doctors use several blood tests to diagnose diabetes:\n\n- Fasting Plasma Glucose (FPG) Test: Measures blood sugar after an overnight fast.\n- A1C Test: Measures your average blood sugar level over the past 2 to 3 months. An A1C of 6.5% or higher on two separate tests indicates diabetes.\n- Oral Glucose Tolerance Test (OGTT): Measures blood sugar before and 2 hours after drinking a sweet liquid.',
+          ),
+          ArticleSection(
+            title: 'Understanding Prediabetes',
+            body: 'Prediabetes means your blood sugar levels are higher than normal but not high enough to be classified as type 2 diabetes. Detecting prediabetes early gives you a chance to reverse it through lifestyle adjustments before it progresses.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Hypoglycemia: Knowing the Signs',
-        description: 'Low blood sugar is dangerous. Knowing signs like shakiness, sweating, and confusion helps you react quickly by eating quick sugar.',
-        icon: Icons.new_releases_rounded,
+        title: 'Methods for Preventing Diabetes',
+        description: 'Although type 1 diabetes is unavoidable, changing your lifestyle could significantly contribute to preventing or delaying type 2 diabetes.',
+        icon: Icons.favorite_rounded,
         gradientColors: [const Color(0xFFFFD54F), const Color(0xFFF57F17)],
         sections: [
           ArticleSection(
-            title: 'Treating Hypoglycemia',
-            body: 'If your blood sugar drops below 70 mg/dL, apply the 15-15 rule: consume 15 grams of fast-acting sugar (e.g. fruit juice), wait 15 minutes, and re-test.',
+            title: 'Lifestyle Habits that Protect You',
+            body: 'Preventing type 2 diabetes involves making simple, sustainable daily changes:\n\n- Eat a balanced, nutrient-dense diet rich in fiber and whole grains.\n- Engage in regular physical activity (at least 150 minutes of moderate exercise per week).\n- Achieve and maintain a healthy body weight.\n- Limit sugary drinks, highly processed foods, and trans fats.\n- Avoid smoking and manage chronic stress levels.',
+          ),
+          ArticleSection(
+            title: 'The Importance of Early Action',
+            body: 'Small shifts in diet and activity can lower your risk of developing type 2 diabetes by up to 60%. Starting early, especially if you have a family history, is key to lifelong glycemic health.',
           ),
         ],
       ),
