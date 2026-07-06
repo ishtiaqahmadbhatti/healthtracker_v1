@@ -103,28 +103,64 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFFFFA726), const Color(0xFFF57C00)],
         sections: [
           ArticleSection(
-            title: 'Age and Lifestyle Factors',
-            body: 'Susceptibility to high blood pressure increases with age as arteries naturally stiffen. However, lifestyle choices such as a high-sodium diet, lack of physical activity, smoking, and chronic stress play a massive role.',
+            title: 'Age:',
+            body: 'The likelihood of getting high blood pressure increases with age. As we age, our blood vessels gradually lose their elasticity, which can lead to increased blood pressure. However, high blood pressure can also develop in children.',
           ),
           ArticleSection(
-            title: 'Genetics and Medical History',
-            body: 'A family history of high blood pressure, diabetes, or kidney disease significantly increases your likelihood. Individuals with these risk factors should start monitoring their vitals earlier in life.',
+            title: 'Race/Ethnicity:',
+            body: 'African-Americans are more prone to developing high blood pressure than people of any other racial background in the United States. High blood pressure also tends to be more severe in African Americans, and some medications are less effective in treating high blood pressure in blacks.',
+          ),
+          ArticleSection(
+            title: 'Weight:',
+            body: 'People who are overweight or have obesity are more likely to develop high blood pressure.',
+          ),
+          ArticleSection(
+            title: 'Gender:',
+            body: 'Men are more likely to develop high blood pressure than women until age 64. After age 65, women are more prone to high blood pressure.',
+          ),
+          ArticleSection(
+            title: 'Lifestyle:',
+            body: 'Certain lifestyle habits can increase the risk of high blood pressure, such as consuming unhealthy foods with high sodium and low potassium, drinking excessive alcohol or caffeine, lack of physical activity, smoking, or using illegal drugs such as cocaine, bath salts, and methamphetamine. Poor sleep quality can also increase the risk of high blood pressure.',
+          ),
+          ArticleSection(
+            title: 'Family History:',
+            body: 'If your parents or other close blood relatives have high blood pressure, you have an increased chance of developing it too.',
           ),
         ],
       ),
       ArticleItem(
         title: 'How to prevent high Blood Pressure?',
-        description: 'A healthy lifestyle is crucial in preventing high blood pressure. If you already have hypertension, modifications can control it.',
+        description: 'A healthy lifestyle is crucial in preventing high blood pressure. If you already have the condition, it\'s important to stop it from worsening or leading to complications.',
         icon: Icons.favorite_rounded,
         gradientColors: [const Color(0xFFEF5350), const Color(0xFFD32F2F)],
         sections: [
           ArticleSection(
-            title: 'Healthy Dietary Choices',
-            body: 'Preventing hypertension begins in the kitchen. Reduce sodium intake, limit processed foods, and increase potassium-rich options (bananas, spinach) to support healthy vessel relaxation.',
+            title: 'Introduction:',
+            body: 'A healthy lifestyle is crucial in preventing high blood pressure. If you already have the condition, it\'s important to stop it from worsening or leading to complications. Regular medical checkups and adherence to the recommended treatment plan are essential. The plan may include suggestions for healthy lifestyle practices and prescription drugs.',
           ),
           ArticleSection(
-            title: 'Stress Management & Sleep',
-            body: 'Practicing mindfulness, getting 7-9 hours of quality sleep, and maintaining a healthy body weight keep stress hormones in check, protecting your blood vessels from chronic constriction.',
+            title: 'Eating a healthy diet:',
+            body: 'To control your blood pressure, reduce your sodium intake and increase your potassium consumption. Eating plenty of nutritious grains, fruits, and vegetables, as well as low-fat foods, is also essential. The DASH diet is an example of a diet that can lower blood pressure.',
+          ),
+          ArticleSection(
+            title: 'Getting regular exercise:',
+            body: 'Exercise can help lower your blood pressure and maintain a healthy weight. The goal should be at least two and a half hours of moderate-intensity aerobic exercise per week or one hour and fifteen minutes of vigorous-intensity aerobic exercise. Any activity that elevates your heart rate and oxygen consumption, such as brisk walking, is considered aerobic activity.',
+          ),
+          ArticleSection(
+            title: 'Maintaining a Healthy Weight',
+            body: 'If you are overweight or obese, your risk of high blood pressure increases. However, you can reduce your risk of high blood pressure and other health problems by maintaining a healthy weight.',
+          ),
+          ArticleSection(
+            title: 'Limiting Alcohol Intake',
+            body: 'Excessive alcohol consumption can cause an increase in blood pressure and can also lead to weight gain due to the additional calories. It is recommended that women limit their alcohol intake to only one drink per day, and men should not have more than two drinks per day.',
+          ),
+          ArticleSection(
+            title: 'Avoiding Smoking',
+            body: 'Smoking cigarettes is known to increase blood pressure and the risk of heart attack and stroke. If you do not smoke, do not start. If you are currently a smoker, talk to your healthcare provider to determine the best method to quit.',
+          ),
+          ArticleSection(
+            title: 'Managing Stress',
+            body: 'Reducing stress levels through relaxation techniques, such as exercise, listening to music, focusing on calming activities, and meditation, can improve both physical and emotional health and lower blood pressure.',
           ),
         ],
       ),
