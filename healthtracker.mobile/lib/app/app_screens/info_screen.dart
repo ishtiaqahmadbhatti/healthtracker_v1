@@ -71,12 +71,20 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFF2979FF), const Color(0xFF1565C0)],
         sections: [
           ArticleSection(
-            title: 'Aerobic Activity Benefits',
-            body: 'Regular aerobic exercise, such as walking, jogging, cycling, or swimming, strengthens the heart muscle. A stronger heart pumps blood with less effort, reducing pressure on the arteries and lowering blood pressure levels naturally.',
+            title: '',
+            body: 'If you are looking for drug-free ways to control, prevent, and treat hypertension, this is the right place. This article will provide you with some exercises that can help lower your blood pressure, which can have a significant impact on your overall health.',
           ),
           ArticleSection(
-            title: 'Recommended Routine',
-            body: 'Aim for at least 150 minutes of moderate-intensity exercise per week, or about 30 minutes on most days. Consistent, daily activity is much more effective at lowering blood pressure than short bursts of extreme workouts.',
+            title: '1. Aerobic Exercise',
+            body: 'Aerobic exercise is an effective way to lower blood pressure. Regular aerobic exercise can increase heart rate and respiration, which helps boost cardiovascular fitness, and improve blood flow. Consistent aerobic exercise can lower resting systolic blood pressure by an average of 5 to 8 mmHg.\n\nHow much aerobic exercise is needed?\nConsistency is key when it comes to using regular aerobic activity as a way to manage blood pressure. It is important to remember that stopping exercise can result in a loss of progress.\nTo see significant reductions in blood pressure, it is recommended that people with hypertension engage in moderate aerobic activity 3 to 4 days per week. A daily session average of 30 to 40 minutes is ideal for achieving beneficial results. If completing a full 30 minutes without a break is challenging, breaking it up into 10-minute sessions throughout the day can be just as effective.\n\nExamples of aerobic exercises:\nThese are several examples of aerobic exercises that involve the use of large muscle groups, including climbing stairs, walking, jogging, cycling, swimming, and dancing.',
+          ),
+          ArticleSection(
+            title: '2. Strength training',
+            body: 'Strength training can be used in conjunction with aerobic exercise to help lower blood pressure, or in other words, to naturally and steadily lower blood pressure. In order to engage in strength training, you will typically need weights or equipment such as resistance training machines.\n\nPrecautions\nStrength training can temporarily increase blood pressure, so it is important to seek professional guidance on the ideal parameters, movements, and weights for you.\nFewer repetitions and lower resistance can prevent excessive increases in blood pressure. Begin with one set and gradually work up to a maximum of three sets.\nMake sure to rest for at least 60 seconds between each set if your exercise routine includes more than one set.\nResistance exercise should be done at a moderate pace, not too slowly.\nHolding your breath can cause your blood pressure to rise.\n\nHow much resistance exercise is necessary?\nIt is recommended to perform resistance training two to three times per week at a moderate level of intensity, deliberately and repeatedly exercising the same muscle group in doing the same resistance exercises. Performing the exercises over time helps lower blood pressure.\n\nExamples of equipment-based resistance training\n- Chest press\n- Shoulder press\n- Triceps extension\n- Bicep curl\n- Pull down\n- Lower back extension/Abdominal crunch\n- Quadriceps extension\n- Leg curls\n- Calf raise',
+          ),
+          ArticleSection(
+            title: '3. Exercise for flexibility',
+            body: 'For individuals with hypertension, simple flexibility exercises or stretches can be beneficial. These can help relax muscles and joints, improve blood flow, and reduce stress. Therefore, stretching should be a part of your daily routine.\n\nHow many flexibility exercises are necessary?\nStudies have shown that exercising 2 to 3 days a week can lower blood pressure. It is necessary to hold each stretch for 10 to 30 seconds to achieve benefits.\n\nExamples of flexibility exercises\n- Yoga\n- Pilates',
           ),
         ],
       ),
@@ -87,12 +95,20 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFFEC407A), const Color(0xFFC2185B)],
         sections: [
           ArticleSection(
-            title: 'Gestational Hypertension',
-            body: 'High blood pressure that develops after 20 weeks of pregnancy is known as gestational hypertension. While it usually resolves after delivery, close monitoring is critical to prevent complications for both mother and child.',
+            title: 'What is pregnancy-related hypertension?',
+            body: 'Blood pressure is the amount of force your blood exerts on your artery walls when it is being pumped through them. When this pressure is too high, you have high blood pressure, also known as hypertension. Pregnancy-related high blood pressure can take several forms:',
           ),
           ArticleSection(
-            title: 'Preeclampsia Risks',
-            body: 'Preeclampsia is a serious condition characterized by high blood pressure and signs of damage to other organ systems, often kidneys (protein in urine). Early prenatal care and frequent monitoring of blood pressure are crucial.',
+            title: '1. Gestational hypertension',
+            body: 'Gestational hypertension is high blood pressure that develops during pregnancy, typically after 20 weeks. It usually does not have any other symptoms. Gestational hypertension often has no adverse effects on you or your unborn child and resolves within 12 weeks after delivery. However, it increases your risk of developing high blood pressure later on. In some cases, it can be severe and lead to low birth weight or preterm delivery. Some pregnant women may go on to develop preeclampsia.',
+          ),
+          ArticleSection(
+            title: '2. Chronic hypertension',
+            body: 'High blood pressure that existed before the 20th week of pregnancy or before pregnancy itself. Some women may have had it for a long time before becoming pregnant but were unaware of it until their blood pressure was tested during prenatal visits. Preeclampsia can develop as a result of chronic hypertension.',
+          ),
+          ArticleSection(
+            title: '3. Preeclampsia',
+            body: 'A sudden increase in blood pressure after the 20th week of pregnancy is known as preeclampsia. It typically occurs in the third trimester. In rare cases, symptoms may not appear until after delivery. Preeclampsia may also present symptoms of liver or kidney dysfunction. Two possible symptoms are protein in the urine and extremely high blood pressure. Preeclampsia can be dangerous or even fatal for you and your unborn child.',
           ),
         ],
       ),

@@ -174,7 +174,7 @@ class AboutVitalDetailsScreen extends StatelessWidget {
                 ),
               ),
             )
-          else
+          else if (section.title.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Text(
@@ -212,9 +212,11 @@ class AboutVitalDetailsScreen extends StatelessWidget {
   }
 
   Color? _getSectionHeaderColor(String title) {
-    if (title.contains('1. Hypotension')) return const Color(0xFF2979FF); // Blue
-    if (title.contains('2. Normal')) return const Color(0xFF4CAF50); // Green
+    if (title.contains('1. Hypotension') || title.contains('1. Aerobic Exercise') || title.contains('1. Gestational hypertension')) return const Color(0xFF2979FF); // Blue
+    if (title.contains('2. Normal') || title.contains('2. Strength training') || title.contains('2. Chronic hypertension')) return const Color(0xFF4CAF50); // Green
     if (title.contains('3. Elevated')) return const Color(0xFFFFD54F); // Yellow/Amber
+    if (title.contains('3. Exercise for flexibility')) return const Color(0xFFFB8C00); // Orange
+    if (title.contains('3. Preeclampsia')) return const Color(0xFFEC407A); // Pink
     if (title.contains('4. High Blood Pressure - Stage 1')) return const Color(0xFFFF9100); // Light Orange
     if (title.contains('5. High Blood Pressure - Stage 2')) return const Color(0xFFFF3D00); // Dark Orange
     if (title.contains('6. Dangerously')) return const Color(0xFFD50000); // Red
