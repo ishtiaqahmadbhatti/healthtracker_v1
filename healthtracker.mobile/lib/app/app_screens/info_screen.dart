@@ -319,12 +319,28 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFFFFD54F), const Color(0xFFF57F17)],
         sections: [
           ArticleSection(
-            title: 'Lifestyle Habits that Protect You',
-            body: 'Preventing type 2 diabetes involves making simple, sustainable daily changes:\n\n- Eat a balanced, nutrient-dense diet rich in fiber and whole grains.\n- Engage in regular physical activity (at least 150 minutes of moderate exercise per week).\n- Achieve and maintain a healthy body weight.\n- Limit sugary drinks, highly processed foods, and trans fats.\n- Avoid smoking and manage chronic stress levels.',
+            title: '',
+            body: 'Although type 1 diabetes is unavoidable, changing your lifestyle could significantly contribute to the prevention of type 2 diabetes. You can take action right now. Follow the suggestions provided below to prevent future serious health problems related to diabetes.',
           ),
           ArticleSection(
-            title: 'The Importance of Early Action',
-            body: 'Small shifts in diet and activity can lower your risk of developing type 2 diabetes by up to 60%. Starting early, especially if you have a family history, is key to lifelong glycemic health.',
+            title: 'Maintain a Nutritious Diet',
+            body: 'Choosing foods with fewer calories and less fat while increasing fiber can help regulate your blood sugar levels. Consuming foods that contain fewer calories can help with weight loss. To reduce your sugar intake, opt for whole foods like fruits, vegetables, whole grains, fish, and water. Avoid saturated fats such as butter, animal fat, coconut oil, and palm oil. Try to consume small meals throughout the day.',
+          ),
+          ArticleSection(
+            title: 'Engage in Physical Activity',
+            body: 'Gradually incorporate physical activity into your daily routine for at least 30 minutes, five days a week. You can choose from a variety of moderate aerobic activities, such as biking, brisk walking, hiking, and more.',
+          ),
+          ArticleSection(
+            title: 'Maintain a Healthy Weight',
+            body: 'Use a BMI calculator to determine your ideal weight range. If you are overweight, reducing your weight by 7% can have a significant impact. However, if you have gestational diabetes, seek medical advice before attempting to lose weight.\n\nMaintaining a healthy lifestyle can prevent diabetes and improve overall health.',
+          ),
+          ArticleSection(
+            title: 'Stop smoking.',
+            body: 'Smoking increases the risk of developing diabetes. If you wish to prevent diabetes, it is advisable to quit smoking.',
+          ),
+          ArticleSection(
+            title: 'Manage blood pressure',
+            body: 'Maintaining a normal blood pressure level is equally important in preventing diabetes as controlling blood sugar levels, as individuals with high blood pressure have a higher risk of developing type 2 diabetes.\n\nBy implementing these changes, those at risk of the disease can delay or prevent its onset, and also reap other health benefits.',
           ),
         ],
       ),
