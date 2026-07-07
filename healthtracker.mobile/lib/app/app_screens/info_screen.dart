@@ -349,98 +349,130 @@ class InfoScreen extends StatelessWidget {
     // Dynamic articles list for Heart Rate (8 contents)
     final heartArticles = [
       ArticleItem(
-        title: 'Resting Heart Rate Explained',
-        description: 'Your resting heart rate is the number of times your heart beats per minute when you are at rest. A normal range is 60 to 100 bpm.',
+        title: 'Understanding Heart Rate',
+        description: 'Your heart rate is simply the count of how many times your heart beats in one minute. It\'s amazing...',
         icon: Icons.favorite_border_rounded,
-        gradientColors: [const Color(0xFFEF5350), const Color(0xFFC62828)],
+        gradientColors: [const Color(0xFFBA68C8), const Color(0xFF7B1FA2)],
         sections: [
           ArticleSection(
-            title: 'Resting Pulse Metrics',
-            body: 'Your resting heart rate refers to the beats per minute when you are completely relaxed. A lower resting pulse typically indicates better cardiovascular fitness.',
+            title: '',
+            body: 'Your heart rate is simply the count of how many times your heart beats in one minute. It\'s amazing to think that this tireless muscle keeps pumping blood throughout your body day in and day out, adapting its speed to meet your needs.',
+          ),
+          ArticleSection(
+            title: 'What is Heart Rate?',
+            body: 'Heart rate is measured in beats per minute (bpm). When you are resting, your heart beats slower, and when you are active, it beats faster to supply more oxygen and nutrients to your muscles.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Understanding Maximum Heart Rate',
-        description: 'Max heart rate is the upper limit of what your cardiovascular system can handle during physical activity, estimated by subtracting your age from 220.',
+        title: 'Normal Heart Rate',
+        description: 'A normal heart rate for adults at rest is typically between 60 and 100 beats per minute (bpm). How...',
+        icon: Icons.health_and_safety_rounded,
+        gradientColors: [const Color(0xFF4CAF50), const Color(0xFF2E7D32)],
+        sections: [
+          ArticleSection(
+            title: '',
+            body: 'A normal heart rate for adults at rest is typically between 60 and 100 beats per minute (bpm). However, this range can vary based on factors like fitness level, age, and health status.',
+          ),
+          ArticleSection(
+            title: 'Factors influencing normal resting heart rate',
+            body: 'Highly active people or athletes often have lower resting heart rates, sometimes as low as 40 bpm, because their heart muscles are in better condition and pump blood more efficiently.',
+          ),
+        ],
+      ),
+      ArticleItem(
+        title: 'Factors that Affect Heart Rate',
+        description: 'When you engage in physical activity, your body requires more oxygen and nutrients, which incre...',
         icon: Icons.trending_up_rounded,
-        gradientColors: [const Color(0xFFFF7043), const Color(0xFFD84315)],
+        gradientColors: [const Color(0xFF29B6F6), const Color(0xFF0288D1)],
         sections: [
           ArticleSection(
-            title: 'Max Heart Rate Zones',
-            body: 'Calculate your limit using standard calculations. Train at 50-70% of max heart rate for moderate activity, and 70-85% for vigorous activity.',
+            title: '',
+            body: 'When you engage in physical activity, your body requires more oxygen and nutrients, which increases your heart rate. Many other daily elements also influence how fast your heart beats.',
+          ),
+          ArticleSection(
+            title: 'Key factors affecting heart rate',
+            body: '- Temperature and Humidity: High temperatures make the heart pump slightly faster.\n\n- Body Position: Standing up can temporarily increase heart rate.\n\n- Emotions: Stress, anxiety, or excitement elevate pulse.\n\n- Medications: Certain drugs can raise or lower your heartbeat.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Tachycardia: Fast Heart Rate Signs',
-        description: 'Tachycardia occurs when your resting heart rate exceeds 100 beats per minute. Consult your doctor if this is accompanied by chest pain or dizziness.',
-        icon: Icons.offline_bolt_rounded,
-        gradientColors: [const Color(0xFFAB47BC), const Color(0xFF6A1B9A)],
+        title: 'How to Control Heart Rate (Temporary Measures)?',
+        description: 'A fast heart rate, also known as tachycardia, is generally defined as a heart rate greater than 100 b...',
+        icon: Icons.control_point_rounded,
+        gradientColors: [const Color(0xFFFF8A65), const Color(0xFFD84315)],
         sections: [
           ArticleSection(
-            title: 'High Pulse Symptoms',
-            body: 'Common indicators include shortness of breath, lightheadedness, chest pounding, and heart palpitations during resting periods.',
+            title: '',
+            body: 'A fast heart rate, also known as tachycardia, is generally defined as a heart rate greater than 100 bpm at rest. While chronic issues require medical attention, there are temporary measures to help slow it down.',
+          ),
+          ArticleSection(
+            title: 'Immediate techniques to reduce heart rate',
+            body: '- Deep Breathing Exercises: Breathe in slowly for 4 seconds and exhale for 6 seconds.\n\n- Vagal Maneuvers: Splashing cold water on your face stimulates the vagus nerve.\n\n- Rest and Relaxation: Sit or lie down in a quiet place and focus on calming thoughts.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Bradycardia: Slow Heart Rate Signs',
-        description: 'Bradycardia is a condition where the heart beats fewer than 60 times per minute. While common in athletes, it can indicate issues in older adults.',
-        icon: Icons.timer_rounded,
+        title: 'Impact of Heart Rate on Health',
+        description: 'When heart rate is consistently high, it can lead to an increased risk of cardiovascular diseases s...',
+        icon: Icons.medical_services_rounded,
         gradientColors: [const Color(0xFF26A69A), const Color(0xFF00695C)],
         sections: [
           ArticleSection(
-            title: 'Low Pulse Symptoms',
-            body: 'If pulse falls below 60 and you experience fainting, extreme fatigue, memory issues, or chest pain, seek medical evaluation.',
+            title: '',
+            body: 'When heart rate is consistently high, it can lead to an increased risk of cardiovascular diseases, indicating potential underlying issues with heart muscle strain.',
+          ),
+          ArticleSection(
+            title: 'Long-term cardiovascular impacts',
+            body: 'A chronically elevated resting heart rate is associated with a higher risk of heart attacks, stroke, and overall cardiovascular mortality. It is a key biomarker of autonomic nervous system balance.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Cardiovascular Workouts for Heart Strength',
-        description: 'Aerobic exercises like swimming, running, and cycling train your heart muscle, improving oxygen delivery throughout your body.',
-        icon: Icons.fitness_center_rounded,
-        gradientColors: [const Color(0xFF42A5F5), const Color(0xFF1565C0)],
+        title: 'Changes to Improve Cardiovascular Health',
+        description: 'Smoking is a major risk factor for heart disease. If you smoke, quitting is the single most import...',
+        icon: Icons.star_rounded,
+        gradientColors: [const Color(0xFFFFD54F), const Color(0xFFF57F17)],
         sections: [
           ArticleSection(
-            title: 'Aerobic Conditioning',
-            body: 'Engage in heart-rate elevating workouts 3-4 times per week to reduce resting arterial load and increase stroke volume.',
+            title: '',
+            body: 'Smoking is a major risk factor for heart disease. If you smoke, quitting is the single most important lifestyle change you can make to lower your heart rate and improve vascular health.',
+          ),
+          ArticleSection(
+            title: 'Other healthy habits for your heart',
+            body: '- Regular Exercise: Aim for at least 150 minutes of moderate-intensity exercise weekly.\n\n- Heart-Healthy Diet: Limit saturated fats, sodium, and refined sugars.\n\n- Stress Management: Practice daily relaxation techniques.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Stress and Its Impact on Pulse',
-        description: 'Chronic stress triggers stress hormones like cortisol and adrenaline, raising your baseline heart rate and blood pressure over time.',
-        icon: Icons.psychology_rounded,
-        gradientColors: [const Color(0xFF26C6DA), const Color(0xFF00838F)],
+        title: 'Resting Heart Rate & Exercise Heart Rate',
+        description: 'Resting heart rate is the number of times your heart beats per minute when you are at rest. This means...',
+        icon: Icons.speed_rounded,
+        gradientColors: [const Color(0xFF26A69A), const Color(0xFF00838F)],
         sections: [
           ArticleSection(
-            title: 'Fight or Flight Response',
-            body: 'Stress triggers neurotransmitters that elevate heart contraction rates. Deep breathing and meditation exercises immediately reverse these spikes.',
+            title: '',
+            body: 'Resting heart rate is the number of times your heart beats per minute when you are at rest. This means you are sitting or lying down and are quiet.',
+          ),
+          ArticleSection(
+            title: 'Exercise heart rate dynamics',
+            body: 'During exercise, your heart rate increases to pump more oxygen-rich blood to active muscles. Tracking both resting and exercise heart rates helps monitor fitness progress and safety.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Heart Rate Training Zones',
-        description: 'Target heart rate zones determine exercise intensity. Zone 2 promotes fat burn, while Zone 4-5 targets anaerobic threshold.',
-        icon: Icons.layers_rounded,
-        gradientColors: [const Color(0xFF9CCC65), const Color(0xFF558B2F)],
+        title: 'Target Exercise Heart Rate',
+        description: 'Target exercise heart rate is the range of heart rates that you should aim for during physical act...',
+        icon: Icons.center_focus_strong_rounded,
+        gradientColors: [const Color(0xFF5C6BC0), const Color(0xFF3F51B5)],
         sections: [
           ArticleSection(
-            title: 'Understanding Zones 1-5',
-            body: 'Zone 1 is recovery, Zone 2 builds endurance, Zone 3 improves aerobic capacity, Zone 4 targets lactate threshold, and Zone 5 is maximal effort.',
+            title: '',
+            body: 'Target exercise heart rate is the range of heart rates that you should aim for during physical activity. Staying in this range ensures you get the most benefit from your workout.',
           ),
-        ],
-      ),
-      ArticleItem(
-        title: 'Pulse Monitoring Wearables',
-        description: 'Smartwatches and chest straps use optical or electrical sensors to track heart rate throughout the day, recording metrics to notice trends.',
-        icon: Icons.watch_rounded,
-        gradientColors: [const Color(0xFF78909C), const Color(0xFF37474F)],
-        sections: [
           ArticleSection(
-            title: 'Wearables Accuracy',
-            body: 'Chest straps capture electrical heart signals (ECG style) and are highly accurate. Smartwatches use optical PPG sensors, which are good for general trends.',
+            title: 'Finding your target heart rate zone',
+            body: 'Moderate activity: 50% to 70% of your maximum heart rate.\n\nVigorous activity: 70% to 85% of your maximum heart rate.\n\nMaximum heart rate is calculated as 220 minus your age.',
           ),
         ],
       ),
