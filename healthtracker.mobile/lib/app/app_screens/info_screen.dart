@@ -291,12 +291,24 @@ class InfoScreen extends StatelessWidget {
         gradientColors: [const Color(0xFF26A69A), const Color(0xFF00695C)],
         sections: [
           ArticleSection(
-            title: 'Standard Diagnostic Tests',
-            body: 'Doctors use several blood tests to diagnose diabetes:\n\n- Fasting Plasma Glucose (FPG) Test: Measures blood sugar after an overnight fast.\n- A1C Test: Measures your average blood sugar level over the past 2 to 3 months. An A1C of 6.5% or higher on two separate tests indicates diabetes.\n- Oral Glucose Tolerance Test (OGTT): Measures blood sugar before and 2 hours after drinking a sweet liquid.',
+            title: '',
+            body: 'How is diabetes diagnosed? Doctors use blood tests to diagnose and treat diabetes. Typically, at least two tests are ordered to identify diabetes. However, if you have typical diabetic symptoms, a second test may not be necessary.',
           ),
           ArticleSection(
-            title: 'Understanding Prediabetes',
-            body: 'Prediabetes means your blood sugar levels are higher than normal but not high enough to be classified as type 2 diabetes. Detecting prediabetes early gives you a chance to reverse it through lifestyle adjustments before it progresses.',
+            title: 'Glycated Hemoglobin (A1C) Test',
+            body: 'This is the most common test used to diagnose both prediabetes and diabetes. The test can be done without fasting or drinking any fluids. The A1C test measures the amount of blood sugar that has bound to hemoglobin over a period of two to three months. Your A1C level is based on your normal blood sugar level and serves as the basis for your diagnosis.\n\nAn A1C result of 6.5% or higher indicates diabetes. If you have prediabetes, your A1C level should be between 5.7 and 6.4%. A1C results less than 5.7% indicate normal blood sugar levels.',
+          ),
+          ArticleSection(
+            title: 'Fasting Plasma Sugar (FPG) Test',
+            body: 'This test is used to diagnose type 1 diabetes and involves drawing blood at random without fasting. If your test results show a blood sugar level of 200 mg/dL or higher, you may have diabetes.',
+          ),
+          ArticleSection(
+            title: 'Oral Glucose Tolerance Test (OGTT)',
+            body: 'The OGTT measures your blood sugar level after you\'ve fasted for at least eight hours. You\'ll then drink a sugary liquid and have your blood sugar tested every two to three hours to determine whether you have diabetes or prediabetes.',
+          ),
+          ArticleSection(
+            title: 'Diabetes Diagnosis during Pregnancy',
+            body: 'Pregnant women may wonder which of the aforementioned tests is applicable to them. Oral sugar tolerance testing and a sugar challenge test are the answers.\n\nBetween the 24th and 28th weeks of pregnancy, it is typical to check your blood sugar levels.\n\nFirstly, a sugar challenge test will be conducted, and fasting is not required. After drinking a sugary beverage, your blood sugar will be tested one hour later. If your results indicate that your blood sugar is too high (above 140 mg/dL), your OGTT may be skipped.\n\nIf you suspect that you may be developing diabetes, it is advisable to visit a hospital and get tested as soon as possible. An earlier diabetes diagnosis can facilitate quicker treatment initiation.',
           ),
         ],
       ),
