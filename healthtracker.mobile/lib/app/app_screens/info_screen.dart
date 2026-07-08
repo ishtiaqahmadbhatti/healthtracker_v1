@@ -573,74 +573,150 @@ class InfoScreen extends StatelessWidget {
     // Dynamic articles list for Weight & BMI (6 contents)
     final weightArticles = [
       ArticleItem(
-        title: 'Understanding BMI: Body Mass Index',
-        description: 'BMI calculates a person\'s weight categories relative to their height. Ranges: under 18.5 is underweight, 18.5 to 24.9 is healthy.',
+        title: 'Healthy Weight',
+        description: 'Maintaining a healthy weight is essential for preventing diseases and health problems related to be...',
         icon: Icons.monitor_weight_rounded,
         gradientColors: [const Color(0xFF42A5F5), const Color(0xFF0D47A1)],
         sections: [
           ArticleSection(
-            title: 'Calculating Body Mass Index',
-            body: 'BMI is calculated by dividing your weight in kilograms by your height in meters squared. While useful for general groupings, it doesn\'t account for muscle-to-fat ratios.',
+            title: '',
+            body: 'Maintaining a healthy weight is essential for preventing diseases and health problems related to being overweight. Healthy weight range varies among individuals due to biological and mental differences. According to Harvard School of Public Health, healthy weight helps reduce the risk of developing heart disease, stroke, diabetes, hypertension, and several cancers. Thus, knowing your healthy weight range is crucial.\n\nThere are two methods to determine an adult\'s healthy weight. The first method uses body mass index (BMI), which is calculated by dividing weight by height in meters squared when measuring in kilos and meters. If measuring in pounds and inches, divide your weight by your height squared and multiply by a conversion ratio of 703. A BMI between 18.5 to 24.9 indicates a healthy or normal weight.\n\nMeasuring waist circumference is another popular method to determine healthy weight. For men, a waist measurement of 40 inches (101.6 cm) or less and 35 inches (88.9 cm) or less indicate a healthy weight.',
           ),
         ],
       ),
       ArticleItem(
-        title: 'Sustainable Strategies for Weight Loss',
-        description: 'A caloric deficit combined with strength training and healthy sleep is the most sustainable approach to losing excess fat tissue.',
-        icon: Icons.directions_walk_rounded,
-        gradientColors: [const Color(0xFF66BB6A), const Color(0xFF1B5E20)],
-        sections: [
-          ArticleSection(
-            title: 'Habitual Adjustments',
-            body: 'Prioritize protein intake and strength training to maintain lean muscle mass while operating in a moderate caloric deficit (300-500 kcal).',
-          ),
-        ],
-      ),
-      ArticleItem(
-        title: 'Muscle Mass vs. Fat Percentage',
-        description: 'Weight alone is not a comprehensive health metric. Body composition (muscle vs fat) is a more accurate predictor of metabolic health.',
+        title: 'Obesity',
+        description: 'Complex and chronic disease is the medical term used for obesity, which occurs due to the e...',
         icon: Icons.accessibility_new_rounded,
-        gradientColors: [const Color(0xFFFFA726), const Color(0xFFE65100)],
-        sections: [
-          ArticleSection(
-            title: 'Body Recomposition',
-            body: 'Body fat release can occur simultaneously with muscle hypertrophy. Scale weight may stay flat while your body measurements and metabolic indicators improve.',
-          ),
-        ],
-      ),
-      ArticleItem(
-        title: 'Basal Metabolic Rate: BMR Explained',
-        description: 'BMR measures the calories your body burns at rest to maintain vital functions like breathing, circulation, and cell production.',
-        icon: Icons.bolt_rounded,
-        gradientColors: [const Color(0xFFFFD54F), const Color(0xFFF57F17)],
-        sections: [
-          ArticleSection(
-            title: 'BMR and Energy Expenditure',
-            body: 'BMR accounts for 60-75% of your total daily calorie burn. Increasing skeletal muscle tissue increases your baseline BMR, boosting metabolism.',
-          ),
-        ],
-      ),
-      ArticleItem(
-        title: 'Healthy Portion Control Guide',
-        description: 'Eating mindfully and sizing portions using simple hand-measurement tricks prevent accidental overeating during meals.',
-        icon: Icons.flatware_rounded,
-        gradientColors: [const Color(0xFF26A69A), const Color(0xFF004D40)],
-        sections: [
-          ArticleSection(
-            title: 'Mindful Sizing',
-            body: 'Use visual metrics: palm size for protein, fist size for veggies, cupped hand for complex carbs, and thumb size for fats to regulate calories without strict logging.',
-          ),
-        ],
-      ),
-      ArticleItem(
-        title: 'Creating a Long-term Fitness Routine',
-        description: 'Consistency beats intensity. Set realistic weight targets and find activities you enjoy to maintain long-term metabolic health.',
-        icon: Icons.sports_gymnastics_rounded,
         gradientColors: [const Color(0xFFEC407A), const Color(0xFF880E4F)],
         sections: [
           ArticleSection(
-            title: 'Establishing Consistency',
-            body: 'Start small with 2-3 workouts a week. Focus on creating healthy identity habits rather than looking for immediate drastic weight changes.',
+            title: '',
+            body: 'Complex and chronic disease is the medical term used for obesity, which occurs due to the excessive accumulation of body fat as a result of consuming more calories than the body requires. This can disrupt the body\'s natural functions, leading to various diseases and health issues.\n\nGenerally, obesity in adults is defined as having a body mass index (BMI) of 30 or higher.\n\nObesity is categorized into three classes: Class I, Class II, and Class III, each having specific BMI ranges associated with them, as listed below:\n\n- Class III: BMI of 40 or higher.\n\nObesity in Class III, defined as having a BMI of 40 or higher, is considered severe and is associated with an increased risk of several serious health conditions, such as Type 2 diabetes and heart disease.',
+          ),
+        ],
+      ),
+      ArticleItem(
+        title: 'Obesity Causes',
+        description: 'Many factors can contribute to obesity, including:',
+        icon: Icons.fastfood_rounded,
+        gradientColors: [const Color(0xFFFFA726), const Color(0xFFE65100)],
+        sections: [
+          ArticleSection(
+            title: '',
+            body: 'Many factors can contribute to obesity, including:',
+          ),
+          ArticleSection(
+            title: '1. Unhealthy diet and drinking habits:',
+            body: 'Consuming high-calorie foods and excessive amounts of food regularly may result in weight gain, as the body stores extra energy as fat when calorie intake is increased.',
+          ),
+          ArticleSection(
+            title: '2. Lack of physical activity:',
+            body: 'Leading a sedentary lifestyle, such as sitting at a computer for extended periods, can lead to weight gain as you expend fewer calories than you consume.',
+          ),
+          ArticleSection(
+            title: '3. Genetics:',
+            body: 'Your genetic makeup can make you more susceptible to gaining weight, and leptin deficiency caused by genetics can result in obesity as it prevents the body from signaling the brain to stop eating.',
+          ),
+          ArticleSection(
+            title: '4. Stress:',
+            body: 'Chronic stress may lead to unhealthy eating patterns, causing you to choose less nutritious foods.',
+          ),
+          ArticleSection(
+            title: '5. Inadequate sleep:',
+            body: 'Lack of sleep can impact your hormones, causing an increase in appetite and a craving for high-calorie items, and studies have shown that individuals who sleep adequately tend to weigh less.',
+          ),
+          ArticleSection(
+            title: '6. Medications and medical conditions:',
+            body: 'Increased body weight may be a symptom of medical conditions such as hypothyroidism, Cushing\'s syndrome, depression, and other neurological conditions. Additionally, certain medications, such as steroids, antidepressants, tranquilizers, blood pressure medications, or medications for seizures, can cause weight gain.',
+          ),
+        ],
+      ),
+      ArticleItem(
+        title: 'Diagnosing Obesity',
+        description: 'In order to diagnose obesity, your doctor will perform a series of tests.',
+        icon: Icons.medical_services_rounded,
+        gradientColors: [const Color(0xFF26A69A), const Color(0xFF004D40)],
+        sections: [
+          ArticleSection(
+            title: '',
+            body: 'In order to diagnose obesity, your doctor will perform a series of tests.',
+          ),
+          ArticleSection(
+            title: '1. Calculate Body Mass Index (BMI)',
+            body: 'BMI calculation is a common method to determine if you are obese. If your BMI is over 30, you will be classified as obese. It is recommended to have an annual BMI check to assess your health risk and determine appropriate treatment.',
+          ),
+          ArticleSection(
+            title: '2. Review medical history:',
+            body: 'Your current and past weight, medical conditions, dietary habits, exercise routines, sleep patterns, and stress levels will be evaluated. Additionally, your doctor may inquire about your family\'s medical history.',
+          ),
+          ArticleSection(
+            title: '3. Conduct a physical examination:',
+            body: 'To diagnose obesity and identify any underlying conditions, a comprehensive physical examination will be conducted, which includes assessing vital signs such as blood pressure and heart rate.',
+          ),
+          ArticleSection(
+            title: '4. Additional tests:',
+            body: 'Various assessments will be performed, including ultrasonography to measure body fat, screening tests, skin fold thickness measurements, and waist circumference assessments. Blood tests, liver function testing, and cardiac tests may also be necessary to identify potential health concerns associated with obesity.',
+          ),
+        ],
+      ),
+      ArticleItem(
+        title: 'Revamping Lifestyle to Combat Obesity',
+        description: 'Modifying lifestyle and behaviors can be an effective solution if you are struggling with being ove...',
+        icon: Icons.directions_run_rounded,
+        gradientColors: [const Color(0xFF66BB6A), const Color(0xFF1B5E20)],
+        sections: [
+          ArticleSection(
+            title: '',
+            body: 'Modifying lifestyle and behaviors can be an effective solution if you are struggling with being overweight or obese.',
+          ),
+          ArticleSection(
+            title: '1. Develop a wholesome diet:',
+            body: 'In order to establish a healthy diet, it is essential to first cut back on your sugar and fat intake. You should assess your eating habits and seek advice from your physician to determine your daily calorie requirements. The next step is to opt for nutritious foods, including fruits, vegetables, legumes, whole grains, and nuts.',
+          ),
+          ArticleSection(
+            title: '2. Increase physical activity:',
+            body: 'Increasing physical activity is crucial in treating obesity. Children should engage in at least 60 minutes of exercise daily, while adults should exercise for 150 minutes per week to manage weight. Gradually increase your exercise time to 300 minutes per week as your stamina and fitness level improve.',
+          ),
+          ArticleSection(
+            title: '3. Seek counseling or support groups:',
+            body: 'Seek out support groups and mental health counseling to identify unhealthy obesity triggers, manage anxiety, depression, or emotional eating disorders.',
+          ),
+        ],
+      ),
+      ArticleItem(
+        title: 'Weight-loss tips',
+        description: 'There are some tips for healthy weight loss that are applicable to almost everyone. Read on.',
+        icon: Icons.lightbulb_rounded,
+        gradientColors: [const Color(0xFFFFD54F), const Color(0xFFF57F17)],
+        sections: [
+          ArticleSection(
+            title: '',
+            body: 'There are some tips for healthy weight loss that are applicable to almost everyone. Read on.',
+          ),
+          ArticleSection(
+            title: '1. Eat regularly:',
+            body: 'Eating regularly throughout the day and avoiding skipping meals can help reduce the urge to snack. Keep in mind that skipping meals won\'t help you lose weight faster.',
+          ),
+          ArticleSection(
+            title: '2. Practice mindful eating:',
+            body: 'Eating slowly encourages you to pay attention to what you\'re eating and your portion size while also boosting hormones that aid in weight loss. Tracking where and when you eat extra calories can also help you make healthier food choices and lose weight.',
+          ),
+          ArticleSection(
+            title: '3. Choose high-fiber and high-protein foods:',
+            body: 'Avoid processed foods, excess fat, and sugar. Instead, opt for foods that are high in protein and fiber, which can help you reduce snacking and lose weight more quickly.',
+          ),
+          ArticleSection(
+            title: '4. Get enough sleep:',
+            body: 'People who want to lose weight should get enough sleep because a lack of sleep can slow down metabolism, promote fat accumulation, and interfere with hormones that regulate appetite.',
+          ),
+          ArticleSection(
+            title: '5. Stay hydrated with water:',
+            body: 'Drinks that are high in calories and sugar can be replaced with water, which can also help fill you up and reduce appetite.',
+          ),
+          ArticleSection(
+            title: '6. Exercise in the evening:',
+            body: 'Exercising in the evening can help with weight loss since the body\'s metabolism typically slows down during this time. Performing aerobic exercises after meals can boost your metabolic rate and keep it elevated for several hours after your workout.',
           ),
         ],
       ),
