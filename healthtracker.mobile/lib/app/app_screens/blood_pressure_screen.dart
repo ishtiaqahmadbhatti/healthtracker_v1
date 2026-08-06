@@ -5,6 +5,7 @@ import '../app_models/blood_pressure_record.dart';
 import '../app_database/db_helper.dart';
 import 'blood_pressure_crud_screen.dart';
 import 'blood_pressure_detail_screen.dart';
+import 'blood_pressure_records_screen.dart';
 
 class BloodPressureScreen extends StatefulWidget {
   // Retaining parameters for compatibility with HomeScreen imports
@@ -24,33 +25,6 @@ class BloodPressureScreen extends StatefulWidget {
 class _BloodPressureScreenState extends State<BloodPressureScreen> {
   List<BloodPressureRecord> _dbRecords = [];
   bool _isLoading = true;
-  String _selectedDateFilter = 'This week';
-  DateTimeRange? _selectedDateRange;
-
-  List<BloodPressureRecord> get _filteredRecords {
-    if (_selectedDateFilter == 'All Time') {
-      return _dbRecords;
-    }
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    if (_selectedDateFilter == 'This week') {
-      // Last 7 days including today
-      final sevenDaysAgo = today.subtract(const Duration(days: 7));
-      return _dbRecords.where((rec) => rec.date.isAfter(sevenDaysAgo)).toList();
-    }
-    if (_selectedDateFilter == 'This month') {
-      // Current calendar month
-      return _dbRecords.where((rec) => rec.date.year == now.year && rec.date.month == now.month).toList();
-    }
-    if (_selectedDateFilter == 'Date picker' && _selectedDateRange != null) {
-      final start = DateTime(_selectedDateRange!.start.year, _selectedDateRange!.start.month, _selectedDateRange!.start.day);
-      final end = DateTime(_selectedDateRange!.end.year, _selectedDateRange!.end.month, _selectedDateRange!.end.day, 23, 59, 59);
-      return _dbRecords.where((rec) => rec.date.isAfter(start) && rec.date.isBefore(end)).toList();
-    }
-    return _dbRecords;
-  }
-
-
 
   @override
   void initState() {
@@ -69,7 +43,20 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
 
   // Format date and time for the history list items (e.g., "13 Aug 2026, 02:45 PM")
   String _formatHistoryDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final monthStr = months[date.month - 1];
     final dayStr = date.day.toString().padLeft(2, '0');
     final yearStr = date.year.toString();
@@ -81,8 +68,6 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
 
     return '$dayStr $monthStr $yearStr, $hourStr:$minuteStr $period';
   }
-
-
 
   // Navigate to adding new record screen
   Future<void> _navigateToAddRecord() async {
@@ -106,6 +91,16 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     );
   }
 
+  // Navigate to View All Records Screen
+  Future<void> _navigateToAllRecordsScreen() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const BloodPressureRecordsScreen(),
+      ),
+    );
+    _loadRecords();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +117,11 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+                          icon: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                         const SizedBox(width: 8),
@@ -137,10 +136,18 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.alarm_rounded, color: Colors.white, size: 28),
+                          icon: const Icon(
+                            Icons.alarm_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Reminders for Blood Pressure coming soon!')),
+                              const SnackBar(
+                                content: Text(
+                                  'Reminders for Blood Pressure coming soon!',
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -154,39 +161,42 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                     width: double.infinity,
                     decoration: const BoxDecoration(
                       color: Color(0xFFF5F6F8), // Light grey panel
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30),
+                      ),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Stack(
-                      children: [
-                        SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                          child: Column(
-                            children: [
-                              // Date filter drop-down dropdown
-                              _buildCustomFilterDropdown(),
-                              const SizedBox(height: 16),
-
-                              // Conditional UI: Empty State vs Records Dashboard
-                              _dbRecords.isEmpty ? _buildEmptyState() : _buildDashboardState(),
-                            ],
-                          ),
-                        ),
-                        // Floating action button for adding new record (shows only when not empty)
-                        if (_dbRecords.isNotEmpty)
-                          Positioned(
-                            bottom: 20,
-                            right: 20,
-                            child: FloatingActionButton(
-                              onPressed: _navigateToAddRecord,
-                              backgroundColor: const Color(0xFFE53935),
-                              elevation: 6,
-                              shape: const CircleBorder(),
-                              child: const Icon(Icons.add, color: Colors.white, size: 28),
+                    child: _dbRecords.isEmpty
+                        ? Center(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(24.0),
+                              child: _buildEmptyState(),
                             ),
                           )
-                      ],
-                    ),
+                        : Stack(
+                            children: [
+                              SingleChildScrollView(
+                                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                                child: _buildDashboardState(),
+                              ),
+                              // Floating action button for adding new record (shows only when not empty)
+                              Positioned(
+                                bottom: 20,
+                                right: 20,
+                                child: FloatingActionButton(
+                                  onPressed: _navigateToAddRecord,
+                                  backgroundColor: const Color(0xFFE53935),
+                                  elevation: 6,
+                                  shape: const CircleBorder(),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               ],
@@ -194,31 +204,13 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     );
   }
 
-  // Date Filter Dropdown UI
-  Widget _buildCustomFilterDropdown() {
-    return _CustomDateFilterDropdown(
-      selectedFilter: _selectedDateFilter,
-      selectedDateRange: _selectedDateRange,
-      onSelectedFilterChanged: (newFilter) {
-        setState(() {
-          _selectedDateFilter = newFilter;
-          _selectedDateRange = null;
-        });
-      },
-      onDateRangePicked: (range) {
-        setState(() {
-          _selectedDateRange = range;
-          _selectedDateFilter = 'Date picker';
-        });
-      },
-    );
-  }
-
   // Clipboard empty state (Screenshot 1)
   Widget _buildEmptyState() {
-    return Column(
-      children: [
-        const SizedBox(height: 48),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
         // Clipboard Graphic
         SizedBox(
           width: 100,
@@ -245,14 +237,14 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(7, (index) {
-                      return Container(
-                        height: 2,
-                        color: Colors.grey[200],
-                      );
+                      return Container(height: 2, color: Colors.grey[200]);
                     }),
                   ),
                 ),
@@ -291,10 +283,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFF8A65),
-                  Color(0xFFE53935),
-                ],
+                colors: [Color(0xFFFF8A65), Color(0xFFE53935)],
               ),
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
@@ -302,7 +291,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                   color: const Color(0xFFE53935).withAlpha(40),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
-                )
+                ),
               ],
             ),
             child: const Text(
@@ -316,13 +305,16 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
           ),
         ),
       ],
+    ),
     );
   }
 
   // Dashboard state with circular gauge and records list (Screenshot 4)
   Widget _buildDashboardState() {
-    final filtered = _filteredRecords;
-    final latestRecord = filtered.isNotEmpty ? filtered.first : _dbRecords.first;
+    final filtered = _dbRecords;
+    final latestRecord = filtered.isNotEmpty
+        ? filtered.first
+        : _dbRecords.first;
     final bpInfo = latestRecord.categoryInfo;
 
     return Column(
@@ -339,77 +331,171 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                 color: Colors.black.withAlpha(5),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
-              )
+              ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Custom paint semicircular gauge
-              BloodPressureGauge(category: bpInfo.label),
-              const SizedBox(height: 12),
-              const Text(
-                'your Blood Pressure',
-                style: TextStyle(color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                bpInfo.label,
-                style: TextStyle(
-                  color: bpInfo.color,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Dropdown button mimic average
+              // "Latest Record" App-Themed Header Badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[350]!),
-                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xFFE53935).withAlpha(18),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFE53935).withAlpha(45),
+                    width: 1,
+                  ),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Average', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-                    SizedBox(width: 8),
-                    Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black87),
+                    Icon(
+                      Icons.history_rounded,
+                      color: Color(0xFFE53935),
+                      size: 14,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'Latest Record',
+                      style: TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              // Details SYS / DIA / PUL
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildStatsItem('SYS', latestRecord.sys, 'mmHg'),
-                  _buildStatsItem('DIA', latestRecord.dia, 'mmHg'),
-                  _buildStatsItem('PUL', latestRecord.pul, 'BPM'),
-                ],
+              const SizedBox(height: 8),
+              Center(
+                child: Column(
+                  children: [
+                    // Custom paint semicircular gauge
+                    BloodPressureGauge(category: bpInfo.label),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Your Blood Pressure',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      bpInfo.label,
+                      style: TextStyle(
+                        color: bpInfo.color,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Dropdown button mimic average
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[350]!),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Average',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: Colors.black87,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Details SYS / DIA / PUL
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildStatsItem('SYS', latestRecord.sys, 'mmHg'),
+                        _buildStatsItem('DIA', latestRecord.dia, 'mmHg'),
+                        _buildStatsItem('PUL', latestRecord.pul, 'BPM'),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
-        // History Section
+        // Recents Section Header
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'History',
-              style: TextStyle(color: Colors.black87, fontSize: 18, fontWeight: FontWeight.bold),
+              'Recents',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            Text(
-              'View more >',
-              style: TextStyle(color: Colors.blue[600], fontSize: 14, fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: _navigateToAllRecordsScreen,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE53935).withAlpha(15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFFE53935).withAlpha(40),
+                    width: 1,
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View All Records',
+                      style: TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 3),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Color(0xFFE53935),
+                      size: 11,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
 
-        // List of history records (matching Screenshot 4 layout)
+        // List of history records (limit to 5 items)
         if (filtered.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 32.0),
@@ -422,15 +508,16 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
           )
         else
           ListView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: filtered.length,
+            itemCount: filtered.length > 5 ? 5 : filtered.length,
             itemBuilder: (context, index) {
               final rec = filtered[index];
               final info = rec.categoryInfo;
 
               return Container(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -471,7 +558,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: info.color.withAlpha(75), width: 1.5),
+                              border: Border.all(
+                                color: info.color.withAlpha(75),
+                                width: 1.5,
+                              ),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -489,7 +579,9 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                   height: 2,
                                   width: 24,
                                   color: info.color.withAlpha(90),
-                                  margin: const EdgeInsets.symmetric(vertical: 3),
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 3,
+                                  ),
                                 ),
                                 Text(
                                   rec.dia.toString(),
@@ -522,7 +614,10 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                               children: [
                                 // Line 1: Category Status Badge (Full legibility)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: info.color.withAlpha(22),
                                     borderRadius: BorderRadius.circular(8),
@@ -554,7 +649,8 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
 
                                 // Line 2: Pulse (BPM) on Left & Tag on Right
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
@@ -585,11 +681,19 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                                     ),
                                     if (rec.tag != 'None' && rec.tag.isNotEmpty)
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.grey[100],
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: Colors.grey[300]!, width: 0.8),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey[300]!,
+                                            width: 0.8,
+                                          ),
                                         ),
                                         child: Text(
                                           rec.tag,
@@ -634,7 +738,11 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.black45, fontSize: 13, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.black45,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         Row(
@@ -643,7 +751,11 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
           children: [
             Text(
               value.toString(),
-              style: const TextStyle(color: Colors.black87, fontSize: 26, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(width: 2),
             Text(
@@ -668,9 +780,7 @@ class BloodPressureGauge extends StatelessWidget {
     return SizedBox(
       height: 120,
       width: 220,
-      child: CustomPaint(
-        painter: _GaugePainter(category: category),
-      ),
+      child: CustomPaint(painter: _GaugePainter(category: category)),
     );
   }
 }
@@ -758,12 +868,20 @@ class _GaugePainter extends CustomPainter {
 
     final Offset p1 = needleTip;
     final Offset p2 = Offset(
-      needleTip.dx - arrowSize * cos(needleAngle) + arrowSize * 0.5 * cos(perpAngle),
-      needleTip.dy - arrowSize * sin(needleAngle) + arrowSize * 0.5 * sin(perpAngle),
+      needleTip.dx -
+          arrowSize * cos(needleAngle) +
+          arrowSize * 0.5 * cos(perpAngle),
+      needleTip.dy -
+          arrowSize * sin(needleAngle) +
+          arrowSize * 0.5 * sin(perpAngle),
     );
     final Offset p3 = Offset(
-      needleTip.dx - arrowSize * cos(needleAngle) - arrowSize * 0.5 * cos(perpAngle),
-      needleTip.dy - arrowSize * sin(needleAngle) - arrowSize * 0.5 * sin(perpAngle),
+      needleTip.dx -
+          arrowSize * cos(needleAngle) -
+          arrowSize * 0.5 * cos(perpAngle),
+      needleTip.dy -
+          arrowSize * sin(needleAngle) -
+          arrowSize * 0.5 * sin(perpAngle),
     );
 
     arrowPath.moveTo(p1.dx, p1.dy);
@@ -777,248 +895,3 @@ class _GaugePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-
-// Inline Expandable Date Filter Dropdown Widget
-class _CustomDateFilterDropdown extends StatefulWidget {
-  final String selectedFilter;
-  final DateTimeRange? selectedDateRange;
-  final ValueChanged<String> onSelectedFilterChanged;
-  final ValueChanged<DateTimeRange?> onDateRangePicked;
-
-  const _CustomDateFilterDropdown({
-    required this.selectedFilter,
-    required this.selectedDateRange,
-    required this.onSelectedFilterChanged,
-    required this.onDateRangePicked,
-  });
-
-  @override
-  State<_CustomDateFilterDropdown> createState() => _CustomDateFilterDropdownState();
-}
-
-class _CustomDateFilterDropdownState extends State<_CustomDateFilterDropdown> {
-  bool _isExpanded = false;
-
-  String _getDisplayTitle() {
-    if (widget.selectedFilter == 'Date picker' && widget.selectedDateRange != null) {
-      final start = widget.selectedDateRange!.start;
-      final end = widget.selectedDateRange!.end;
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return "${start.day} ${months[start.month - 1]} - ${end.day} ${months[end.month - 1]}";
-    }
-    return widget.selectedFilter;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header Trigger Button
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today_rounded, color: Color(0xFFE53935), size: 22),
-                      const SizedBox(width: 12),
-                      Text(
-                        _getDisplayTitle(),
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                    color: Colors.black54,
-                    size: 24,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Options List
-          if (_isExpanded) ...[
-            Divider(height: 1, color: Colors.grey[200]),
-            const SizedBox(height: 6),
-            _buildOptionItem(
-              value: 'This week',
-              icon: Icons.date_range_rounded,
-              label: 'This week',
-            ),
-            _buildOptionItem(
-              value: 'This month',
-              icon: Icons.calendar_month_rounded,
-              label: 'This month',
-            ),
-            _buildOptionItem(
-              value: 'All Time',
-              icon: Icons.all_inclusive_rounded,
-              label: 'All Time',
-            ),
-            _buildOptionItem(
-              value: 'Date picker',
-              icon: Icons.today_rounded,
-              label: 'Date picker',
-            ),
-            const SizedBox(height: 8),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOptionItem({
-    required String value,
-    required IconData icon,
-    required String label,
-  }) {
-    final isSelected = widget.selectedFilter == value;
-
-    return InkWell(
-      onTap: () async {
-        setState(() {
-          _isExpanded = false;
-        });
-
-        if (value == 'Date picker') {
-          final DateTimeRange? picked = await showDateRangePicker(
-            context: context,
-            firstDate: DateTime(2020),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
-            builder: (context, child) {
-              return Theme(
-                data: ThemeData.light().copyWith(
-                  scaffoldBackgroundColor: Colors.white,
-                  dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
-                  colorScheme: const ColorScheme.light(
-                    primary: Color(0xFFE53935),
-                    onPrimary: Colors.white,
-                    surface: Colors.white,
-                    onSurface: Colors.black87,
-                    secondary: Color(0xFFE53935),
-                    onSecondary: Colors.white,
-                    surfaceContainerHigh: Colors.white,
-                    surfaceContainerHighest: Colors.white,
-                    onSurfaceVariant: Colors.black87,
-                  ),
-                  appBarTheme: const AppBarTheme(
-                    backgroundColor: Color(0xFFE53935),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    iconTheme: IconThemeData(color: Colors.white),
-                    actionsIconTheme: IconThemeData(color: Colors.white),
-                    titleTextStyle: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  datePickerTheme: DatePickerThemeData(
-                    headerBackgroundColor: const Color(0xFFE53935),
-                    headerForegroundColor: Colors.white,
-                    rangePickerHeaderBackgroundColor: const Color(0xFFE53935),
-                    rangePickerHeaderForegroundColor: Colors.white,
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    dayStyle: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
-                    rangeSelectionBackgroundColor: const Color(0xFFE53935).withAlpha(30),
-                    rangeSelectionOverlayColor: WidgetStateProperty.all(const Color(0xFFE53935).withAlpha(20)),
-                    dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return const Color(0xFFE53935);
-                      }
-                      return null;
-                    }),
-                    dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return Colors.white;
-                      }
-                      return Colors.black87;
-                    }),
-                    todayForegroundColor: WidgetStateProperty.all(const Color(0xFFE53935)),
-                    todayBorder: const BorderSide(color: Color(0xFFE53935), width: 1.5),
-                  ),
-                ),
-                child: child!,
-              );
-            },
-          );
-
-          if (picked != null) {
-            widget.onDateRangePicked(picked);
-          }
-        } else {
-          widget.onSelectedFilterChanged(value);
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE53935).withAlpha(18) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFFE53935) : Colors.black54,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? const Color(0xFFE53935) : Colors.black87,
-                  fontSize: 15,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFFE53935),
-                size: 18,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-

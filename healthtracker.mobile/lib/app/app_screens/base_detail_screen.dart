@@ -109,10 +109,10 @@ class _BaseDetailScreenState extends State<BaseDetailScreen> {
                       },
                     ),
                     if (widget.secondaryFilter != null) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       widget.secondaryFilter!,
                     ],
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 22),
 
                     // Conditional Content (Empty State vs History List)
                     filteredRecords.isEmpty
@@ -129,25 +129,32 @@ class _BaseDetailScreenState extends State<BaseDetailScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (widget.showClipboardIcon) ...[
-          _buildClipboardGraphic(),
-          const SizedBox(height: 24),
-        ],
-        Text(
-          widget.emptyStateMessage ?? 'There is no data yet',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (widget.showClipboardIcon) ...[
+              _buildClipboardGraphic(),
+              const SizedBox(height: 24),
+            ],
+            Text(
+              widget.emptyStateMessage ?? 'There is no data yet',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 36),
+            _buildAddRecordButton(),
+          ],
         ),
-        const SizedBox(height: 36),
-        _buildAddRecordButton(),
-      ],
+      ),
     );
   }
 
@@ -159,24 +166,25 @@ class _BaseDetailScreenState extends State<BaseDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'History Logs',
+              'Recents',
               style: TextStyle(
-                color: Colors.black54,
-                fontSize: 16,
+                color: Colors.black87,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               '${items.length} records',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black38,
                 fontSize: 14,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
         ListView.builder(
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: items.length,
