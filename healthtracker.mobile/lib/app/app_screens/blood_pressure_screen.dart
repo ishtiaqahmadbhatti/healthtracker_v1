@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_models/health_record.dart';
 import '../app_models/blood_pressure_record.dart';
 import '../app_database/db_helper.dart';
-import 'new_blood_pressure_record_screen.dart';
+import 'blood_pressure_crud_screen.dart';
 import 'blood_pressure_detail_screen.dart';
 
 class BloodPressureScreen extends StatefulWidget {
@@ -50,14 +50,7 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     return _dbRecords;
   }
 
-  String _getFilterDisplayTitle() {
-    if (_selectedDateFilter == 'Date picker' && _selectedDateRange != null) {
-      final start = _selectedDateRange!.start;
-      final end = _selectedDateRange!.end;
-      return '${start.day}/${start.month}/${start.year} - ${end.day}/${end.month}/${end.year}';
-    }
-    return _selectedDateFilter;
-  }
+
 
   @override
   void initState() {
@@ -74,59 +67,27 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
     });
   }
 
-  // Format date for the history list items (e.g., "Monday, 13")
+  // Format date and time for the history list items (e.g., "13 Aug 2026, 02:45 PM")
   String _formatHistoryDate(DateTime date) {
-    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final dayStr = weekdays[date.weekday - 1];
-    return '$dayStr, ${date.day}';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final monthStr = months[date.month - 1];
+    final dayStr = date.day.toString().padLeft(2, '0');
+    final yearStr = date.year.toString();
+
+    final hourInt = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final hourStr = hourInt.toString().padLeft(2, '0');
+    final minuteStr = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+
+    return '$dayStr $monthStr $yearStr, $hourStr:$minuteStr $period';
   }
 
-  void _showDeleteDialog(BuildContext context, BloodPressureRecord record) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text(
-            'Delete',
-            style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 22),
-          ),
-          content: const Text(
-            'Are you sure to delete the record?',
-            style: TextStyle(color: Colors.black54, fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                await DatabaseHelper.instance.deleteRecord(record.id);
-                if (context.mounted) {
-                  Navigator.of(context).pop(); // close dialog
-                  _loadRecords(); // refresh parent screen list
-                }
-              },
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Color(0xFFE53935), fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 
   // Navigate to adding new record screen
   Future<void> _navigateToAddRecord() async {
     final result = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const NewBloodPressureRecordScreen()),
+      MaterialPageRoute(builder: (context) => const BloodPressureCrudScreen()),
     );
     if (result == true) {
       _loadRecords();
@@ -235,182 +196,21 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
 
   // Date Filter Dropdown UI
   Widget _buildCustomFilterDropdown() {
-    return PopupMenuButton<String>(
-      initialValue: _selectedDateFilter,
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
-      onSelected: (String value) async {
-        if (value == 'Date picker') {
-          final DateTimeRange? picked = await showDateRangePicker(
-            context: context,
-            firstDate: DateTime(2020),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
-            builder: (context, child) {
-              return Theme(
-                data: Theme.of(context).copyWith(
-                  colorScheme: const ColorScheme.light(
-                    primary: Color(0xFFE53935),
-                    onPrimary: Colors.white,
-                    surface: Colors.white,
-                    onSurface: Colors.black87,
-                    secondary: Color(0xFFE53935),
-                  ),
-                  appBarTheme: const AppBarTheme(
-                    backgroundColor: Color(0xFFE53935),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                  ),
-                  datePickerTheme: DatePickerThemeData(
-                    headerBackgroundColor: const Color(0xFFE53935),
-                    headerForegroundColor: Colors.white,
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    dayStyle: const TextStyle(fontWeight: FontWeight.w600),
-                    rangeSelectionBackgroundColor: const Color(0xFFE53935).withAlpha(30),
-                    rangeSelectionOverlayColor: WidgetStateProperty.all(const Color(0xFFE53935).withAlpha(20)),
-                    dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return const Color(0xFFE53935);
-                      }
-                      return null;
-                    }),
-                    dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return Colors.white;
-                      }
-                      return null;
-                    }),
-                    todayForegroundColor: WidgetStateProperty.all(const Color(0xFFE53935)),
-                    todayBorder: const BorderSide(color: Color(0xFFE53935), width: 1.5),
-                  ),
-                ),
-                child: child!,
-              );
-            },
-          );
-          if (picked != null) {
-            setState(() {
-              _selectedDateRange = picked;
-              _selectedDateFilter = 'Date picker';
-            });
-          }
-        } else {
-          setState(() {
-            _selectedDateFilter = value;
-            _selectedDateRange = null;
-          });
-        }
+    return _CustomDateFilterDropdown(
+      selectedFilter: _selectedDateFilter,
+      selectedDateRange: _selectedDateRange,
+      onSelectedFilterChanged: (newFilter) {
+        setState(() {
+          _selectedDateFilter = newFilter;
+          _selectedDateRange = null;
+        });
       },
-      offset: const Offset(0, 56),
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        _buildPopupMenuItem(
-          value: 'This week',
-          icon: Icons.date_range_rounded,
-          label: 'This week',
-        ),
-        _buildPopupMenuItem(
-          value: 'This month',
-          icon: Icons.calendar_month_rounded,
-          label: 'This month',
-        ),
-        _buildPopupMenuItem(
-          value: 'All Time',
-          icon: Icons.all_inclusive_rounded,
-          label: 'All Time',
-        ),
-        _buildPopupMenuItem(
-          value: 'Date picker',
-          icon: Icons.today_rounded,
-          label: 'Date picker',
-        ),
-      ],
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(5),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            )
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.calendar_today_rounded, color: Color(0xFFE53935), size: 22),
-                const SizedBox(width: 12),
-                Text(
-                  _getFilterDisplayTitle(),
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54, size: 22),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PopupMenuItem<String> _buildPopupMenuItem({
-    required String value,
-    required IconData icon,
-    required String label,
-  }) {
-    final isSelected = _selectedDateFilter == value;
-    return PopupMenuItem<String>(
-      value: value,
-      padding: EdgeInsets.zero,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE53935).withAlpha(15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFFE53935) : Colors.black54,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? const Color(0xFFE53935) : Colors.black87,
-                  fontSize: 15,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFFE53935),
-                size: 18,
-              ),
-          ],
-        ),
-      ),
+      onDateRangePicked: (range) {
+        setState(() {
+          _selectedDateRange = range;
+          _selectedDateFilter = 'Date picker';
+        });
+      },
     );
   }
 
@@ -629,142 +429,196 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
               final rec = filtered[index];
               final info = rec.categoryInfo;
 
-              return GestureDetector(
-                onTap: () => _navigateToDetailRecord(rec),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    children: [
-                      // Circular Badge on the Left (SYS / DIA)
-                      Container(
-                        width: 68,
-                        height: 68,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: info.color, width: 3.5),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(5),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              rec.sys.toString(),
-                              style: const TextStyle(
-                                color: Colors.black87,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                            Container(
-                              height: 1,
-                              width: 32,
-                              color: Colors.black26,
-                              margin: const EdgeInsets.symmetric(vertical: 2),
-                            ),
-                            Text(
-                              rec.dia.toString(),
-                              style: const TextStyle(
-                                color: Colors.black87,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Card Info on the Right
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withAlpha(5),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Date row + delete & share action icons
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _formatHistoryDate(rec.date),
-                                    style: const TextStyle(
-                                      color: Colors.black45,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.share_rounded, color: Colors.black38, size: 18),
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        onPressed: () {},
-                                      ),
-                                      const SizedBox(width: 12),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.black38, size: 18),
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        onPressed: () => _showDeleteDialog(context, rec),
-                                      ),
-                                    ],
-                                  ),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: info.color.withAlpha(22),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withAlpha(7),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () => _navigateToDetailRecord(rec),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Row(
+                        children: [
+                          // Left Section: SYS / DIA Pill Badge
+                          Container(
+                            width: 74,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  info.color.withAlpha(24),
+                                  info.color.withAlpha(12),
                                 ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              const SizedBox(height: 4),
-                              // Category details and pulse details row
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: info.color.withAlpha(75), width: 1.5),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  rec.sys.toString(),
+                                  style: TextStyle(
+                                    color: info.color,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 19,
+                                    height: 1.0,
+                                  ),
+                                ),
+                                Container(
+                                  height: 2,
+                                  width: 24,
+                                  color: info.color.withAlpha(90),
+                                  margin: const EdgeInsets.symmetric(vertical: 3),
+                                ),
+                                Text(
+                                  rec.dia.toString(),
+                                  style: TextStyle(
+                                    color: info.color,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    height: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'mmHg',
+                                  style: TextStyle(
+                                    color: info.color.withAlpha(200),
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+
+                          // Right Section: Structured for zero truncation & full readability
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Line 1: Category Status Badge (Full legibility)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: info.color.withAlpha(22),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      Container(
+                                        width: 7,
+                                        height: 7,
+                                        decoration: BoxDecoration(
+                                          color: info.color,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
                                       Text(
                                         info.label,
-                                        style: const TextStyle(
-                                          color: Colors.black87,
+                                        style: TextStyle(
+                                          color: info.color,
+                                          fontSize: 12.5,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${rec.pul} BPM',
-                                        style: const TextStyle(
-                                          color: Colors.black45,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const Icon(Icons.chevron_right_rounded, color: Colors.black38, size: 24),
-                                ],
-                              ),
-                            ],
+                                ),
+                                const SizedBox(height: 8),
+
+                                // Line 2: Pulse (BPM) on Left & Tag on Right
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.favorite_rounded,
+                                          color: Color(0xFFE53935),
+                                          size: 15,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          '${rec.pul}',
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 14.5,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          'BPM',
+                                          style: TextStyle(
+                                            color: Colors.grey[500],
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (rec.tag != 'None' && rec.tag.isNotEmpty)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(color: Colors.grey[300]!, width: 0.8),
+                                        ),
+                                        child: Text(
+                                          rec.tag,
+                                          style: TextStyle(
+                                            color: Colors.grey[700],
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+
+                                // Line 3: Complete Date & Time (Full legibility)
+                                Text(
+                                  _formatHistoryDate(rec.date),
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               );
@@ -923,3 +777,248 @@ class _GaugePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
+// Inline Expandable Date Filter Dropdown Widget
+class _CustomDateFilterDropdown extends StatefulWidget {
+  final String selectedFilter;
+  final DateTimeRange? selectedDateRange;
+  final ValueChanged<String> onSelectedFilterChanged;
+  final ValueChanged<DateTimeRange?> onDateRangePicked;
+
+  const _CustomDateFilterDropdown({
+    required this.selectedFilter,
+    required this.selectedDateRange,
+    required this.onSelectedFilterChanged,
+    required this.onDateRangePicked,
+  });
+
+  @override
+  State<_CustomDateFilterDropdown> createState() => _CustomDateFilterDropdownState();
+}
+
+class _CustomDateFilterDropdownState extends State<_CustomDateFilterDropdown> {
+  bool _isExpanded = false;
+
+  String _getDisplayTitle() {
+    if (widget.selectedFilter == 'Date picker' && widget.selectedDateRange != null) {
+      final start = widget.selectedDateRange!.start;
+      final end = widget.selectedDateRange!.end;
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return "${start.day} ${months[start.month - 1]} - ${end.day} ${months[end.month - 1]}";
+    }
+    return widget.selectedFilter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(8),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header Trigger Button
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today_rounded, color: Color(0xFFE53935), size: 22),
+                      const SizedBox(width: 12),
+                      Text(
+                        _getDisplayTitle(),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(
+                    _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: Colors.black54,
+                    size: 24,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Options List
+          if (_isExpanded) ...[
+            Divider(height: 1, color: Colors.grey[200]),
+            const SizedBox(height: 6),
+            _buildOptionItem(
+              value: 'This week',
+              icon: Icons.date_range_rounded,
+              label: 'This week',
+            ),
+            _buildOptionItem(
+              value: 'This month',
+              icon: Icons.calendar_month_rounded,
+              label: 'This month',
+            ),
+            _buildOptionItem(
+              value: 'All Time',
+              icon: Icons.all_inclusive_rounded,
+              label: 'All Time',
+            ),
+            _buildOptionItem(
+              value: 'Date picker',
+              icon: Icons.today_rounded,
+              label: 'Date picker',
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionItem({
+    required String value,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = widget.selectedFilter == value;
+
+    return InkWell(
+      onTap: () async {
+        setState(() {
+          _isExpanded = false;
+        });
+
+        if (value == 'Date picker') {
+          final DateTimeRange? picked = await showDateRangePicker(
+            context: context,
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now().add(const Duration(days: 365)),
+            builder: (context, child) {
+              return Theme(
+                data: ThemeData.light().copyWith(
+                  scaffoldBackgroundColor: Colors.white,
+                  dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+                  colorScheme: const ColorScheme.light(
+                    primary: Color(0xFFE53935),
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black87,
+                    secondary: Color(0xFFE53935),
+                    onSecondary: Colors.white,
+                    surfaceContainerHigh: Colors.white,
+                    surfaceContainerHighest: Colors.white,
+                    onSurfaceVariant: Colors.black87,
+                  ),
+                  appBarTheme: const AppBarTheme(
+                    backgroundColor: Color(0xFFE53935),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    iconTheme: IconThemeData(color: Colors.white),
+                    actionsIconTheme: IconThemeData(color: Colors.white),
+                    titleTextStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  datePickerTheme: DatePickerThemeData(
+                    headerBackgroundColor: const Color(0xFFE53935),
+                    headerForegroundColor: Colors.white,
+                    rangePickerHeaderBackgroundColor: const Color(0xFFE53935),
+                    rangePickerHeaderForegroundColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    dayStyle: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
+                    rangeSelectionBackgroundColor: const Color(0xFFE53935).withAlpha(30),
+                    rangeSelectionOverlayColor: WidgetStateProperty.all(const Color(0xFFE53935).withAlpha(20)),
+                    dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return const Color(0xFFE53935);
+                      }
+                      return null;
+                    }),
+                    dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return Colors.white;
+                      }
+                      return Colors.black87;
+                    }),
+                    todayForegroundColor: WidgetStateProperty.all(const Color(0xFFE53935)),
+                    todayBorder: const BorderSide(color: Color(0xFFE53935), width: 1.5),
+                  ),
+                ),
+                child: child!,
+              );
+            },
+          );
+
+          if (picked != null) {
+            widget.onDateRangePicked(picked);
+          }
+        } else {
+          widget.onSelectedFilterChanged(value);
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFE53935).withAlpha(18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFFE53935) : Colors.black54,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFFE53935) : Colors.black87,
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Color(0xFFE53935),
+                size: 18,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

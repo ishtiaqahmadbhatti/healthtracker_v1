@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_models/blood_pressure_record.dart';
 import '../app_database/db_helper.dart';
-import 'new_blood_pressure_record_screen.dart';
+import 'blood_pressure_crud_screen.dart';
 import 'about_vital_details_screen.dart';
 import 'about_vitals_list_screen.dart';
 import '../app_models/bp_articles_data.dart';
@@ -136,7 +136,7 @@ class _BloodPressureDetailScreenState extends State<BloodPressureDetailScreen> {
             onPressed: () async {
               final result = await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => NewBloodPressureRecordScreen(
+                  builder: (context) => BloodPressureCrudScreen(
                     recordToEdit: _currentRecord,
                   ),
                 ),

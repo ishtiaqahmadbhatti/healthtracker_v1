@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import '../app_models/blood_pressure_record.dart';
 import '../app_database/db_helper.dart';
 
-class NewBloodPressureRecordScreen extends StatefulWidget {
+class BloodPressureCrudScreen extends StatefulWidget {
   final BloodPressureRecord? recordToEdit;
-  const NewBloodPressureRecordScreen({super.key, this.recordToEdit});
+  const BloodPressureCrudScreen({super.key, this.recordToEdit});
 
   @override
-  State<NewBloodPressureRecordScreen> createState() => _NewBloodPressureRecordScreenState();
+  State<BloodPressureCrudScreen> createState() => _BloodPressureCrudScreenState();
 }
 
-class _NewBloodPressureRecordScreenState extends State<NewBloodPressureRecordScreen> {
+class _BloodPressureCrudScreenState extends State<BloodPressureCrudScreen> {
   // Value states
   int _sys = 119;
   int _dia = 79;
@@ -134,7 +134,6 @@ class _NewBloodPressureRecordScreenState extends State<NewBloodPressureRecordScr
 
   // Get current BP category details dynamically
   BPCategoryInfo _getCurrentBPInfo() {
-    // Generate temporary model instance to leverage get categoryInfo helper
     final tempRecord = BloodPressureRecord(
       id: '',
       sys: _sys,
