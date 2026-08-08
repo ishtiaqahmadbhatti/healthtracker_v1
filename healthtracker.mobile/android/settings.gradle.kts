@@ -1,5 +1,8 @@
+System.setProperty("PUB_CACHE", "D:/.pub-cache")
+
 pluginManagement {
     val flutterSdkPath =
+
         run {
             val properties = java.util.Properties()
             file("local.properties").inputStream().use { properties.load(it) }
