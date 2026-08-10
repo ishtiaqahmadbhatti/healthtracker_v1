@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app_models/health_record.dart';
+import 'alarm_screen.dart';
 
 class BaseDetailScreen extends StatefulWidget {
   final String title;
@@ -70,10 +71,9 @@ class _BaseDetailScreenState extends State<BaseDetailScreen> {
                   IconButton(
                     icon: const Icon(Icons.alarm_rounded, color: Colors.white, size: 28),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Reminders for ${widget.title} coming soon!'),
-                          duration: const Duration(seconds: 1),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AlarmScreen(),
                         ),
                       );
                     },

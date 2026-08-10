@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'alarm_screen.dart';
+import '../app_models/alarm_record.dart';
+import '../app_database/db_helper.dart';
+import '../app_services/notification_helper.dart';
 
 enum VitalAlarmType { bloodPressure, bloodSugar, heartRate, medicine, custom }
 
 class VitalsAlarmScreen extends StatefulWidget {
   final VitalAlarmType type;
+  final AlarmRecord? existingAlarm;
 
   const VitalsAlarmScreen({
     super.key,
     required this.type,
+    this.existingAlarm,
   });
 
   @override
@@ -18,39 +22,47 @@ class VitalsAlarmScreen extends StatefulWidget {
 class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
-  
+
   final List<TimeOfDay> _times = [];
   final List<bool> _repeatDays = [true, true, true, true, true, true, false]; // S, M, T, W, T, F, S
   final List<String> _dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  
-  DateTime _startDate = DateTime(2026, 6, 28);
-  DateTime _endDate = DateTime(2026, 6, 28);
+
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now().add(const Duration(days: 30));
   bool _neverEnd = true;
 
   @override
   void initState() {
     super.initState();
-    switch (widget.type) {
-      case VitalAlarmType.bloodPressure:
-        _titleController = TextEditingController(text: "It's time to measure your blood pressure.");
-        _descController = TextEditingController(text: "Make sure to take your measurements before taking your medication.");
-        break;
-      case VitalAlarmType.bloodSugar:
-        _titleController = TextEditingController(text: "Time to measure your Blood Sugar.");
-        _descController = TextEditingController(text: "Take your measurements before meals or as directed by your doctor.");
-        break;
-      case VitalAlarmType.heartRate:
-        _titleController = TextEditingController(text: "Time to measure your Heart Rate.");
-        _descController = TextEditingController(text: "Remember to take your measurements before you take your medicines.");
-        break;
-      case VitalAlarmType.medicine:
-        _titleController = TextEditingController(text: "Time to take your medication.");
-        _descController = TextEditingController(text: "Take with water after food or according to your prescription.");
-        break;
-      case VitalAlarmType.custom:
-        _titleController = TextEditingController(text: "Alarm reminder.");
-        _descController = TextEditingController(text: "Set custom details for this alarm.");
-        break;
+    if (widget.existingAlarm != null) {
+      final alarm = widget.existingAlarm!;
+      _titleController = TextEditingController(text: alarm.title);
+      _descController = TextEditingController(text: alarm.description);
+      _times.add(TimeOfDay(hour: alarm.hour, minute: alarm.minute));
+      _neverEnd = alarm.neverEnd;
+    } else {
+      switch (widget.type) {
+        case VitalAlarmType.bloodPressure:
+          _titleController = TextEditingController(text: "It's time to measure your blood pressure.");
+          _descController = TextEditingController(text: "Make sure to take your measurements before taking your medication.");
+          break;
+        case VitalAlarmType.bloodSugar:
+          _titleController = TextEditingController(text: "Time to measure your Blood Sugar.");
+          _descController = TextEditingController(text: "Take your measurements before meals or as directed by your doctor.");
+          break;
+        case VitalAlarmType.heartRate:
+          _titleController = TextEditingController(text: "Time to measure your Heart Rate.");
+          _descController = TextEditingController(text: "Remember to take your measurements before you take your medicines.");
+          break;
+        case VitalAlarmType.medicine:
+          _titleController = TextEditingController(text: "Time to take your medication.");
+          _descController = TextEditingController(text: "Take with water after food or according to your prescription.");
+          break;
+        case VitalAlarmType.custom:
+          _titleController = TextEditingController(text: "Alarm reminder.");
+          _descController = TextEditingController(text: "Set custom details for this alarm.");
+          break;
+      }
     }
   }
 
@@ -64,12 +76,12 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: const TimeOfDay(hour: 22, minute: 51),
+      initialTime: _times.isNotEmpty ? _times.first : TimeOfDay.now(),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFE53935), // Header background of picker
+              primary: Color(0xFFE53935),
               onPrimary: Colors.white,
               onSurface: Colors.black87,
             ),
@@ -92,7 +104,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
       context: context,
       initialDate: _startDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      lastDate: DateTime(2035),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -106,7 +118,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
         );
       },
     );
-    if (picked != null && picked != _startDate) {
+    if (picked != null) {
       setState(() {
         _startDate = picked;
       });
@@ -118,7 +130,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
       context: context,
       initialDate: _endDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      lastDate: DateTime(2035),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -132,7 +144,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
         );
       },
     );
-    if (picked != null && picked != _endDate) {
+    if (picked != null) {
       setState(() {
         _endDate = picked;
         _neverEnd = false;
@@ -154,7 +166,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
     return "${hour.toString().padLeft(2, '0')}:$minute $period";
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a title')),
@@ -165,39 +177,66 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
     final String frequency = _times.isEmpty 
         ? "Once per day" 
         : "${_times.length} times per day";
-    
-    final String nextTimeStr = _times.isNotEmpty 
-        ? _formatTimeOfDay(_times.first) 
-        : "08:00 AM";
 
-    final Widget vitalIcon;
-    switch (widget.type) {
-      case VitalAlarmType.bloodPressure:
-        vitalIcon = const Icon(Icons.health_and_safety_rounded, color: Color(0xFF1E8D89), size: 32);
-        break;
-      case VitalAlarmType.bloodSugar:
-        vitalIcon = const Icon(Icons.water_drop_rounded, color: Color(0xFF9C27B0), size: 32);
-        break;
-      case VitalAlarmType.heartRate:
-        vitalIcon = const Icon(Icons.favorite_rounded, color: Color(0xFFE54A4A), size: 32);
-        break;
-      case VitalAlarmType.medicine:
-        vitalIcon = const Icon(Icons.vaccines_rounded, color: Color(0xFFFA9314), size: 32);
-        break;
-      case VitalAlarmType.custom:
-        vitalIcon = const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E7BFA), size: 32);
-        break;
+    final now = DateTime.now();
+    final TimeOfDay targetTime = _times.isNotEmpty
+        ? _times.first
+        : TimeOfDay(hour: (now.hour + (now.minute >= 59 ? 1 : 0)) % 24, minute: (now.minute + 1) % 60);
+
+    DateTime scheduledDate = DateTime(
+      _startDate.year,
+      _startDate.month,
+      _startDate.day,
+      targetTime.hour,
+      targetTime.minute,
+    );
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = DateTime(now.year, now.month, now.day, targetTime.hour, targetTime.minute);
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
     }
 
-    final AlarmItem newItem = AlarmItem(
+    final String alarmId = widget.existingAlarm?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final String typeStr = widget.type.name;
+
+    final AlarmRecord alarmRecord = AlarmRecord(
+      id: alarmId,
       title: _titleController.text.trim(),
+      description: _descController.text.trim(),
+      type: typeStr,
       frequency: frequency,
-      nextExecution: "Next, ${_formatDate(_startDate)}\n$nextTimeStr",
-      icon: vitalIcon,
+      nextExecution: "Next, ${_formatDate(scheduledDate)}\n${_formatTimeOfDay(targetTime)}",
+      hour: targetTime.hour,
+      minute: targetTime.minute,
+      startDate: _formatDate(_startDate),
+      endDate: _neverEnd ? 'Never' : _formatDate(_endDate),
+      neverEnd: _neverEnd,
       isEnabled: true,
     );
 
-    Navigator.of(context).pop(newItem);
+    // Save to persistent database
+    if (widget.existingAlarm != null) {
+      await DatabaseHelper.instance.updateAlarm(alarmRecord);
+    } else {
+      await DatabaseHelper.instance.insertAlarm(alarmRecord);
+    }
+
+    if (!mounted) return;
+
+    // Schedule notification + ringing alert
+    NotificationHelper.instance.scheduleAlarm(
+      id: alarmRecord.id.hashCode,
+      title: alarmRecord.title,
+      body: alarmRecord.description.isNotEmpty
+          ? alarmRecord.description
+          : "It is time for your scheduled vital measurement!",
+      targetDateTime: scheduledDate,
+      context: context,
+    );
+
+    Navigator.of(context).pop(alarmRecord);
   }
 
   @override
@@ -235,7 +274,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE53935), // Header background
+      backgroundColor: const Color(0xFFE53935),
       body: Column(
         children: [
           // AppBar / Header Section
@@ -251,10 +290,10 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    screenTitle,
+                    widget.existingAlarm != null ? 'Edit $screenTitle Alarm' : screenTitle,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -262,8 +301,8 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
               ),
             ),
           ),
-          
-          // Graphic Logo Badge transitioning down
+
+          // Graphic Logo Badge
           Container(
             height: 48,
             width: double.infinity,
@@ -297,7 +336,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
               ),
             ),
           ),
-          
+
           // Form body card
           Expanded(
             child: Container(
@@ -359,7 +398,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Description ( Optional)',
+                          'Description (Optional)',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -522,7 +561,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.black12,
+                          color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -533,10 +572,10 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: Colors.black87,
                               ),
                             ),
-                            const Icon(Icons.calendar_today_rounded, color: Colors.white70, size: 20),
+                            const Icon(Icons.calendar_today_rounded, color: Colors.black54, size: 20),
                           ],
                         ),
                       ),
@@ -605,7 +644,7 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: Colors.black12,
+                                color: Colors.grey[200],
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
@@ -616,10 +655,10 @@ class _VitalsAlarmScreenState extends State<VitalsAlarmScreen> {
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                  const Icon(Icons.calendar_today_rounded, color: Colors.white70, size: 20),
+                                  const Icon(Icons.calendar_today_rounded, color: Colors.black54, size: 20),
                                 ],
                               ),
                             ),

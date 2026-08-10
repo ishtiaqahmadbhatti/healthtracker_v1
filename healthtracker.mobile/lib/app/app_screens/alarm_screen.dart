@@ -1,22 +1,8 @@
-// ignore_for_file: unused_element
 import 'package:flutter/material.dart';
+import '../app_models/alarm_record.dart';
+import '../app_database/db_helper.dart';
+import '../app_services/notification_helper.dart';
 import 'vitals_alarm_screen.dart';
-
-class AlarmItem {
-  final String title;
-  final String frequency;
-  final String nextExecution;
-  final Widget icon;
-  bool isEnabled;
-
-  AlarmItem({
-    required this.title,
-    required this.frequency,
-    required this.nextExecution,
-    required this.icon,
-    this.isEnabled = false,
-  });
-}
 
 class AlarmScreen extends StatefulWidget {
   const AlarmScreen({super.key});
@@ -26,12 +12,133 @@ class AlarmScreen extends StatefulWidget {
 }
 
 class _AlarmScreenState extends State<AlarmScreen> {
-  late final List<AlarmItem> _alarms;
+  List<AlarmRecord> _alarms = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _alarms = [];
+    _loadAlarms();
+  }
+
+  Future<void> _loadAlarms() async {
+    setState(() => _isLoading = true);
+    final savedAlarms = await DatabaseHelper.instance.getAllAlarms();
+    setState(() {
+      _alarms = savedAlarms;
+      _isLoading = false;
+    });
+
+    // Ensure notification timers are active for enabled alarms
+    for (final alarm in savedAlarms) {
+      if (alarm.isEnabled) {
+        _rescheduleNotification(alarm);
+      }
+    }
+  }
+
+  void _rescheduleNotification(AlarmRecord alarm) {
+    final now = DateTime.now();
+    DateTime targetDate = DateTime(now.year, now.month, now.day, alarm.hour, alarm.minute);
+    if (targetDate.isBefore(now)) {
+      targetDate = targetDate.add(const Duration(days: 1));
+    }
+
+    NotificationHelper.instance.scheduleAlarm(
+      id: alarm.id.hashCode,
+      title: alarm.title,
+      body: alarm.description.isNotEmpty ? alarm.description : "It is time for your scheduled vital measurement!",
+      targetDateTime: targetDate,
+      context: null,
+    );
+  }
+
+  Future<void> _toggleAlarmState(AlarmRecord alarm, bool newValue) async {
+    setState(() {
+      alarm.isEnabled = newValue;
+    });
+
+    await DatabaseHelper.instance.updateAlarm(alarm);
+
+    if (newValue) {
+      _rescheduleNotification(alarm);
+    } else {
+      NotificationHelper.instance.cancelAlarmTimer(alarm.id.hashCode);
+    }
+  }
+
+  Future<void> _deleteAlarm(AlarmRecord alarm) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Alarm'),
+        content: Text('Are you sure you want to delete "${alarm.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete', style: TextStyle(color: Color(0xFFE53935), fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await DatabaseHelper.instance.deleteAlarm(alarm.id);
+      NotificationHelper.instance.cancelAlarmTimer(alarm.id.hashCode);
+      _loadAlarms();
+    }
+  }
+
+  Widget _getIconForType(String typeStr) {
+    switch (typeStr) {
+      case 'bloodPressure':
+        return const Icon(Icons.health_and_safety_rounded, color: Color(0xFF1E8D89), size: 32);
+      case 'bloodSugar':
+        return const Icon(Icons.water_drop_rounded, color: Color(0xFF9C27B0), size: 32);
+      case 'heartRate':
+        return const Icon(Icons.favorite_rounded, color: Color(0xFFE54A4A), size: 32);
+      case 'medicine':
+        return const Icon(Icons.vaccines_rounded, color: Color(0xFFFA9314), size: 32);
+      case 'custom':
+      default:
+        return const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E7BFA), size: 32);
+    }
+  }
+
+  VitalAlarmType _enumFromTypeStr(String typeStr) {
+    switch (typeStr) {
+      case 'bloodPressure':
+        return VitalAlarmType.bloodPressure;
+      case 'bloodSugar':
+        return VitalAlarmType.bloodSugar;
+      case 'heartRate':
+        return VitalAlarmType.heartRate;
+      case 'medicine':
+        return VitalAlarmType.medicine;
+      case 'custom':
+      default:
+        return VitalAlarmType.custom;
+    }
+  }
+
+  void _editAlarm(AlarmRecord alarm) async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VitalsAlarmScreen(
+          type: _enumFromTypeStr(alarm.type),
+          existingAlarm: alarm,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      _loadAlarms();
+    }
   }
 
   @override
@@ -73,35 +180,37 @@ class _AlarmScreenState extends State<AlarmScreen> {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               clipBehavior: Clip.antiAlias,
-              child: _alarms.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildAlarmClockGraphic(),
-                          const SizedBox(height: 24),
-                          const Text(
-                            'No reminder yet. Add your first\nreminder',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              height: 1.3,
-                            ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFFE53935)))
+                  : _alarms.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildAlarmClockGraphic(),
+                              const SizedBox(height: 24),
+                              const Text(
+                                'No reminder yet. Add your first\nreminder',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3,
+                                ),
+                              ),
+                              const SizedBox(height: 80),
+                            ],
                           ),
-                          const SizedBox(height: 80), // Offset slightly for FAB balance
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 80),
-                      itemCount: _alarms.length,
-                      itemBuilder: (context, index) {
-                        final alarm = _alarms[index];
-                        return _buildAlarmCard(alarm);
-                      },
-                    ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 80),
+                          itemCount: _alarms.length,
+                          itemBuilder: (context, index) {
+                            final alarm = _alarms[index];
+                            return _buildAlarmCard(alarm);
+                          },
+                        ),
             ),
           ),
         ],
@@ -113,8 +222,8 @@ class _AlarmScreenState extends State<AlarmScreen> {
           shape: BoxShape.circle,
           gradient: LinearGradient(
             colors: [
-              Color(0xFFEF5350), // Red
-              Color(0xFFE53935), // Dark Red
+              Color(0xFFEF5350),
+              Color(0xFFE53935),
             ],
           ),
         ),
@@ -129,103 +238,100 @@ class _AlarmScreenState extends State<AlarmScreen> {
     );
   }
 
-  Widget _buildAlarmCard(AlarmItem alarm) {
+  Widget _buildAlarmCard(AlarmRecord alarm) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFEAEAEA), // Grey card background
         borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left: White circle icon background
-          Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Center(child: alarm.icon),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(8),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(width: 16),
-          // Middle: Text descriptions
-          Expanded(
-            child: Column(
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: () => _editAlarm(alarm),
+          onLongPress: () => _deleteAlarm(alarm),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  alarm.title,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                // Left: White circle icon background
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(child: _getIconForType(alarm.type)),
+                ),
+                const SizedBox(width: 16),
+                // Middle: Text descriptions
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        alarm.title,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        alarm.frequency,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        alarm.nextExecution,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  alarm.frequency,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  alarm.nextExecution,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    height: 1.2,
-                  ),
+                // Right: Actions (Delete & Toggle Switch)
+                Column(
+                  children: [
+                    Switch(
+                      value: alarm.isEnabled,
+                      onChanged: (newValue) => _toggleAlarmState(alarm, newValue),
+                      activeThumbColor: const Color(0xFFE53935),
+                      activeTrackColor: const Color(0xFFFFCDD2),
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: Colors.black26,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, color: Colors.black45, size: 22),
+                      onPressed: () => _deleteAlarm(alarm),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          // Right: Toggle Switch
-          Switch(
-            value: alarm.isEnabled,
-            onChanged: (newValue) {
-              setState(() {
-                alarm.isEnabled = newValue;
-              });
-            },
-            activeThumbColor: const Color(0xFFE53935),
-            activeTrackColor: const Color(0xFFFFCDD2),
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: Colors.black26,
-          ),
-        ],
+        ),
       ),
-    );
-  }
-
-  // Badges
-  Widget _buildBpIcon() {
-    return const Icon(
-      Icons.health_and_safety_rounded,
-      color: Color(0xFF1E8D89),
-      size: 32,
-    );
-  }
-
-  Widget _buildHeartRateIcon() {
-    return const Icon(
-      Icons.favorite_rounded,
-      color: Color(0xFFE54A4A),
-      size: 32,
-    );
-  }
-
-  Widget _buildMedicationIcon() {
-    return const Icon(
-      Icons.vaccines_rounded,
-      color: Color(0xFFFA9314),
-      size: 32,
     );
   }
 
@@ -234,10 +340,10 @@ class _AlarmScreenState extends State<AlarmScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24), // Extends dialog width on small devices
+          insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          clipBehavior: Clip.antiAlias, // Clips the header gradient container to dialog shape
+          clipBehavior: Clip.antiAlias,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -246,8 +352,8 @@ class _AlarmScreenState extends State<AlarmScreen> {
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFFEF5350), // Red
-                      Color(0xFFE53935), // Dark Red
+                      Color(0xFFEF5350),
+                      Color(0xFFE53935),
                     ],
                   ),
                 ),
@@ -327,7 +433,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F6F8), // Soft off-white for list card rows
+        color: const Color(0xFFF5F6F8),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey[200]!, width: 1),
       ),
@@ -373,44 +479,35 @@ class _AlarmScreenState extends State<AlarmScreen> {
 
   void _handleTypeSelected(BuildContext context, String type) async {
     Navigator.of(context).pop();
-    
-    if (type == 'Blood Pressure' || 
-        type == 'Blood Sugar' || 
-        type == 'Heart Rate' || 
-        type == 'Medicine' || 
-        type == 'Custom') {
-        
-      final VitalAlarmType vitalType;
-      switch (type) {
-        case 'Blood Pressure':
-          vitalType = VitalAlarmType.bloodPressure;
-          break;
-        case 'Blood Sugar':
-          vitalType = VitalAlarmType.bloodSugar;
-          break;
-        case 'Heart Rate':
-          vitalType = VitalAlarmType.heartRate;
-          break;
-        case 'Medicine':
-          vitalType = VitalAlarmType.medicine;
-          break;
-        case 'Custom':
-        default:
-          vitalType = VitalAlarmType.custom;
-          break;
-      }
 
-      final result = await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => VitalsAlarmScreen(type: vitalType),
-        ),
-      );
-      
-      if (result is AlarmItem) {
-        setState(() {
-          _alarms.add(result);
-        });
-      }
+    final VitalAlarmType vitalType;
+    switch (type) {
+      case 'Blood Pressure':
+        vitalType = VitalAlarmType.bloodPressure;
+        break;
+      case 'Blood Sugar':
+        vitalType = VitalAlarmType.bloodSugar;
+        break;
+      case 'Heart Rate':
+        vitalType = VitalAlarmType.heartRate;
+        break;
+      case 'Medicine':
+        vitalType = VitalAlarmType.medicine;
+        break;
+      case 'Custom':
+      default:
+        vitalType = VitalAlarmType.custom;
+        break;
+    }
+
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VitalsAlarmScreen(type: vitalType),
+      ),
+    );
+
+    if (result != null) {
+      _loadAlarms();
     }
   }
 
@@ -567,7 +664,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                 width: 40,
                 height: 20,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFBC02D), // Gold/yellow
+                  color: Color(0xFFFBC02D),
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
               ),
@@ -583,7 +680,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                 width: 40,
                 height: 20,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFBC02D), // Gold/yellow
+                  color: Color(0xFFFBC02D),
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
               ),
@@ -595,7 +692,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFD54F), // Bright Yellow
+              color: const Color(0xFFFFD54F),
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFFFBC02D), width: 6),
               boxShadow: [
@@ -691,7 +788,6 @@ class _SoundWavePainter extends CustomPainter {
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
-    // Small wave
     canvas.drawArc(
       Rect.fromLTWH(isLeft ? 10 : -20, 10, 40, 40),
       isLeft ? 2.3 : -0.8,
@@ -700,7 +796,6 @@ class _SoundWavePainter extends CustomPainter {
       paint,
     );
 
-    // Large wave
     canvas.drawArc(
       Rect.fromLTWH(isLeft ? 0 : -30, 0, 60, 60),
       isLeft ? 2.3 : -0.8,

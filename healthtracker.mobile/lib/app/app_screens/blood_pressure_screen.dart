@@ -6,6 +6,7 @@ import '../app_database/db_helper.dart';
 import 'blood_pressure_crud_screen.dart';
 import 'blood_pressure_detail_screen.dart';
 import 'blood_pressure_records_screen.dart';
+import 'alarm_screen.dart';
 
 class BloodPressureScreen extends StatefulWidget {
   // Retaining parameters for compatibility with HomeScreen imports
@@ -142,11 +143,9 @@ class _BloodPressureScreenState extends State<BloodPressureScreen> {
                             size: 28,
                           ),
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Reminders for Blood Pressure coming soon!',
-                                ),
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const AlarmScreen(),
                               ),
                             );
                           },

@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../app_models/blood_pressure_record.dart';
+import '../app_models/alarm_record.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -20,8 +21,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -39,8 +41,36 @@ class DatabaseHelper {
         note TEXT NOT NULL
       )
     ''');
+
+    await _createAlarmsTable(db);
   }
 
+  Future _createAlarmsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS vitals_alarms (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        type TEXT NOT NULL,
+        frequency TEXT NOT NULL,
+        nextExecution TEXT NOT NULL,
+        hour INTEGER NOT NULL,
+        minute INTEGER NOT NULL,
+        startDate TEXT NOT NULL,
+        endDate TEXT NOT NULL,
+        neverEnd INTEGER NOT NULL,
+        isEnabled INTEGER NOT NULL
+      )
+    ''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createAlarmsTable(db);
+    }
+  }
+
+  // --- Blood Pressure Records ---
   Future<BloodPressureRecord?> getRecordById(String id) async {
     final db = await instance.database;
     final maps = await db.query(
@@ -90,6 +120,45 @@ class DatabaseHelper {
       record.toMap(),
       where: 'id = ?',
       whereArgs: [record.id],
+    );
+  }
+
+  // --- Vitals Alarms CRUD ---
+  Future<int> insertAlarm(AlarmRecord alarm) async {
+    final db = await instance.database;
+    return await db.insert(
+      'vitals_alarms',
+      alarm.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<AlarmRecord>> getAllAlarms() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'vitals_alarms',
+      orderBy: 'hour ASC, minute ASC',
+    );
+
+    return result.map((json) => AlarmRecord.fromMap(json)).toList();
+  }
+
+  Future<int> updateAlarm(AlarmRecord alarm) async {
+    final db = await instance.database;
+    return await db.update(
+      'vitals_alarms',
+      alarm.toMap(),
+      where: 'id = ?',
+      whereArgs: [alarm.id],
+    );
+  }
+
+  Future<int> deleteAlarm(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'vitals_alarms',
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 
