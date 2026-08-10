@@ -27,20 +27,20 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
   @override
   void initState() {
     super.initState();
-    // Start pulsing animation for bell graphic
+    // Pulsing ring animation for bell icon badge
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.25).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Ensure alarm sound is playing loudly
+    // Play continuous alarm sound
     NotificationHelper.instance.playAlarmRingtone();
 
-    // Update digital clock every second
+    // Update digital clock every second (showing HH:mm:ss AM/PM)
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -68,14 +68,26 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
     return "${_formatTwoDigits(hour)}:$minute:$second $period";
   }
 
+  bool _isProcessingDismiss = false;
+
   void _onStopAlarm() async {
+    if (_isProcessingDismiss) return;
+    _isProcessingDismiss = true;
+
+    NotificationHelper.instance.isRingingScreenDisplayed = false;
     await NotificationHelper.instance.stopAlarmRingtone();
+    NotificationHelper.instance.cancelAlarmTimer(widget.alarmId);
+
     if (mounted) {
       Navigator.of(context).pop();
     }
   }
 
   void _onSnoozeAlarm() async {
+    if (_isProcessingDismiss) return;
+    _isProcessingDismiss = true;
+
+    NotificationHelper.instance.isRingingScreenDisplayed = false;
     await NotificationHelper.instance.snoozeAlarm(
       id: widget.alarmId,
       title: widget.title,
@@ -128,14 +140,14 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Top Banner Header
+                  // 1. Top Section: HEALTH TRACKER ALARM Pill Badge & Clock (02:36:02 PM)
                   Column(
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -159,15 +171,14 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                           ],
                         ),
                       ),
-                      const SizedBox(height: 30),
-                      // Big Live Digital Clock
+                      const SizedBox(height: 24),
                       Text(
                         _formattedTime(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 42,
                           fontWeight: FontWeight.w800,
-                          letterSpacing: 2,
+                          letterSpacing: 1.5,
                           shadows: [
                             Shadow(
                               color: Colors.black45,
@@ -180,7 +191,7 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                     ],
                   ),
 
-                  // Center Pulsing Graphic & Title
+                  // 2. Middle Section: Center Pulsing Bell Avatar + Title & Description
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -217,15 +228,15 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
-                      // Title
+                      const SizedBox(height: 36),
                       Text(
                         widget.title,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          height: 1.3,
                         ),
                       ),
                       if (widget.body.isNotEmpty) ...[
@@ -246,7 +257,7 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                     ],
                   ),
 
-                  // Action Buttons (Snooze & Dismiss)
+                  // 3. Bottom Section: SNOOZE (5 MINS) & STOP / DISMISS ALARM Buttons
                   Column(
                     children: [
                       // Snooze Button
@@ -257,7 +268,7 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                           onPressed: _onSnoozeAlarm,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white54, width: 2),
+                            side: const BorderSide(color: Color(0xFFFFB74D), width: 2),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(28),
                             ),
@@ -266,7 +277,7 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                           label: const Text(
                             "SNOOZE (5 MINS)",
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
                               color: Color(0xFFFFB74D),
@@ -290,11 +301,11 @@ class _AlarmRingingScreenState extends State<AlarmRingingScreen> with SingleTick
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          icon: const Icon(Icons.stop_circle_rounded, size: 30, color: Color(0xFFE53935)),
+                          icon: const Icon(Icons.stop_circle_rounded, size: 28, color: Color(0xFFE53935)),
                           label: const Text(
                             "STOP / DISMISS ALARM",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 17,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 1.2,
                               color: Color(0xFFE53935),

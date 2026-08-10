@@ -61,16 +61,23 @@ class NotificationHelper {
     _isInitialized = true;
   }
 
-  void _handleNotificationAction(NotificationResponse response) {
-    if (navigatorKey?.currentContext != null) {
-      final context = navigatorKey!.currentContext!;
-      final payload = response.payload ?? "";
-      final parts = payload.split('|');
-      final title = parts.isNotEmpty ? parts[0] : "Scheduled Alarm";
-      final body = parts.length > 1 ? parts[1] : "Time for your health measurement!";
-      final alarmId = parts.length > 2 ? (int.tryParse(parts[2]) ?? 0) : 0;
+  bool isRingingScreenDisplayed = false;
 
-      Navigator.of(context).push(
+  void openRingingScreen({
+    required int alarmId,
+    required String title,
+    required String body,
+    BuildContext? context,
+  }) {
+    if (isRingingScreenDisplayed) return;
+
+    final targetContext = (context != null && context.mounted)
+        ? context
+        : navigatorKey?.currentContext;
+
+    if (targetContext != null) {
+      isRingingScreenDisplayed = true;
+      Navigator.of(targetContext).push(
         MaterialPageRoute(
           builder: (ctx) => AlarmRingingScreen(
             alarmId: alarmId,
@@ -78,8 +85,24 @@ class NotificationHelper {
             body: body,
           ),
         ),
-      );
+      ).then((_) {
+        isRingingScreenDisplayed = false;
+      });
     }
+  }
+
+  void _handleNotificationAction(NotificationResponse response) {
+    final payload = response.payload ?? "";
+    final parts = payload.split('|');
+    final title = parts.isNotEmpty ? parts[0] : "Scheduled Alarm";
+    final body = parts.length > 1 ? parts[1] : "Time for your health measurement!";
+    final alarmId = parts.length > 2 ? (int.tryParse(parts[2]) ?? 0) : 0;
+
+    openRingingScreen(
+      alarmId: alarmId,
+      title: title,
+      body: body,
+    );
   }
 
   // Play continuous loud offline alarm ringtone in loop mode
@@ -127,6 +150,63 @@ class NotificationHelper {
     );
   }
 
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    await initialize();
+
+    final BigTextStyleInformation bigTextStyleInformation = BigTextStyleInformation(
+      body,
+      htmlFormatBigText: true,
+      contentTitle: "⏰ ALARM: $title",
+      htmlFormatContentTitle: true,
+      summaryText: "Health Tracker Alarm",
+      htmlFormatSummaryText: true,
+    );
+
+    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'vitals_alarm_channel_fullscreen_v5',
+      'Vitals Alarm Sound Reminders',
+      channelDescription: 'High priority channel with loud alarm ringtone for health vitals',
+      importance: Importance.max,
+      priority: Priority.max,
+      showWhen: true,
+      playSound: true,
+      sound: const RawResourceAndroidNotificationSound('alarm_ringtone'),
+      enableVibration: true,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
+      category: AndroidNotificationCategory.alarm,
+      fullScreenIntent: true,
+      visibility: NotificationVisibility.public,
+      styleInformation: bigTextStyleInformation,
+      ticker: "⏰ ALARM: $title",
+      ongoing: true,
+      autoCancel: false,
+    );
+
+    final platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentSound: true,
+        presentBadge: true,
+        sound: 'alarm_ringtone.wav',
+        interruptionLevel: InterruptionLevel.critical,
+      ),
+    );
+
+    await _notificationsPlugin.show(
+      id,
+      "⏰ ALARM: $title",
+      body,
+      platformChannelSpecifics,
+      payload: payload ?? "$title|$body|$id",
+    );
+  }
+
   // Schedule exact native background alarm + in-app timer trigger
   Future<void> scheduleAlarm({
     required int id,
@@ -167,9 +247,18 @@ class NotificationHelper {
     try {
       final tzTarget = tz.TZDateTime.from(targetDateTime, tz.local);
 
+      final BigTextStyleInformation bigTextStyleInformation = BigTextStyleInformation(
+        body,
+        htmlFormatBigText: true,
+        contentTitle: "⏰ ALARM: $title",
+        htmlFormatContentTitle: true,
+        summaryText: "Health Tracker Alarm",
+        htmlFormatSummaryText: true,
+      );
+
       final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'vitals_alarm_channel_loud_v2',
-        'Vitals Loud Native Alarm Clock',
+        'vitals_alarm_channel_fullscreen_v5',
+        'Vitals Alarm Sound Reminders',
         channelDescription: 'High priority channel with loud alarm ringtone for health vitals',
         importance: Importance.max,
         priority: Priority.max,
@@ -181,6 +270,10 @@ class NotificationHelper {
         category: AndroidNotificationCategory.alarm,
         fullScreenIntent: true,
         visibility: NotificationVisibility.public,
+        styleInformation: bigTextStyleInformation,
+        ticker: "⏰ ALARM: $title",
+        ongoing: true,
+        autoCancel: false,
       );
 
       final platformChannelSpecifics = NotificationDetails(
@@ -207,31 +300,20 @@ class NotificationHelper {
       debugPrint("Error setting exact background alarm: $e");
     }
 
-    // 2. Foreground active timer fallback for full-screen ringing UI
+    // 2. Play alarm sound and navigate to full-screen ringing UI when timer expires
     final timer = Timer(duration, () async {
       await playAlarmRingtone();
+      await showNotification(
+        id: id,
+        title: title,
+        body: body,
+      );
 
-      if (context != null && context.mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (ctx) => AlarmRingingScreen(
-              alarmId: id,
-              title: title,
-              body: body,
-            ),
-          ),
-        );
-      } else if (navigatorKey?.currentContext != null) {
-        Navigator.of(navigatorKey!.currentContext!).push(
-          MaterialPageRoute(
-            builder: (ctx) => AlarmRingingScreen(
-              alarmId: id,
-              title: title,
-              body: body,
-            ),
-          ),
-        );
-      }
+      openRingingScreen(
+        alarmId: id,
+        title: title,
+        body: body,
+      );
     });
 
     _activeTimers[id] = timer;
