@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'app/app_screens/splash_screen.dart';
 import 'app/app_services/notification_helper.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationHelper.instance.initialize();
+  await NotificationHelper.instance.initialize(navKey: navigatorKey);
   runApp(const MyApp());
 }
 
@@ -15,6 +17,7 @@ class MyApp extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Health Tracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -31,3 +34,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

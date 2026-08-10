@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import '../app_screens/alarm_ringing_screen.dart';
 
 class NotificationHelper {
   static final NotificationHelper instance = NotificationHelper._init();
@@ -10,11 +13,19 @@ class NotificationHelper {
   bool _isInitialized = false;
   bool _isRinging = false;
   final Map<int, Timer> _activeTimers = {};
+  GlobalKey<NavigatorState>? navigatorKey;
 
   NotificationHelper._init();
 
-  Future<void> initialize() async {
+  Future<void> initialize({GlobalKey<NavigatorState>? navKey}) async {
+    if (navKey != null) {
+      navigatorKey = navKey;
+    }
+
     if (_isInitialized) return;
+
+    // Initialize TimeZone database for exact background alarms
+    tz.initializeTimeZones();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -35,27 +46,56 @@ class NotificationHelper {
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         stopAlarmRingtone();
+        _handleNotificationAction(response);
       },
     );
 
-    _notificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidImplementation != null) {
+      await androidImplementation.requestNotificationsPermission();
+      await androidImplementation.requestExactAlarmsPermission();
+    }
 
     _isInitialized = true;
   }
 
-  // Play continuous loud alarm ringtone in loop mode
+  void _handleNotificationAction(NotificationResponse response) {
+    if (navigatorKey?.currentContext != null) {
+      final context = navigatorKey!.currentContext!;
+      final payload = response.payload ?? "";
+      final parts = payload.split('|');
+      final title = parts.isNotEmpty ? parts[0] : "Scheduled Alarm";
+      final body = parts.length > 1 ? parts[1] : "Time for your health measurement!";
+      final alarmId = parts.length > 2 ? (int.tryParse(parts[2]) ?? 0) : 0;
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (ctx) => AlarmRingingScreen(
+            alarmId: alarmId,
+            title: title,
+            body: body,
+          ),
+        ),
+      );
+    }
+  }
+
+  // Play continuous loud offline alarm ringtone in loop mode
   Future<void> playAlarmRingtone() async {
     try {
+      if (_isRinging) return;
       _isRinging = true;
+      await _audioPlayer.stop();
       await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      // High quality digital watch / alarm clock sound source
+      await _audioPlayer.setVolume(1.0);
+      // Play 100% offline bundled alarm audio asset
       await _audioPlayer.play(
-        UrlSource("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"),
+        AssetSource('sounds/alarm_ringtone.wav'),
       );
     } catch (e) {
-      debugPrint("Error playing alarm ringtone: $e");
+      debugPrint("Error playing offline alarm ringtone: $e");
     }
   }
 
@@ -69,55 +109,33 @@ class NotificationHelper {
     }
   }
 
-  Future<void> showNotification({
+  // Snooze alarm for specified minutes
+  Future<void> snoozeAlarm({
     required int id,
     required String title,
     required String body,
-    String? payload,
+    int minutes = 5,
   }) async {
-    await initialize();
-
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'vitals_alarm_channel_loud',
-      'Vitals Alarm Sound Reminders',
-      channelDescription: 'High priority channel with loud alarm ringtone for health vitals',
-      importance: Importance.max,
-      priority: Priority.max,
-      showWhen: true,
-      playSound: true,
-      enableVibration: true,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      category: AndroidNotificationCategory.alarm,
-      fullScreenIntent: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentSound: true,
-        presentBadge: true,
-        interruptionLevel: InterruptionLevel.timeSensitive,
-      ),
-    );
-
-    await _notificationsPlugin.show(
-      id,
-      title,
-      body,
-      platformChannelSpecifics,
-      payload: payload,
+    await stopAlarmRingtone();
+    final snoozeTime = DateTime.now().add(Duration(minutes: minutes));
+    scheduleAlarm(
+      id: id,
+      title: title,
+      body: body,
+      targetDateTime: snoozeTime,
+      context: null,
     );
   }
 
-  // Schedule an alarm with active Timer fallback for in-app ringing + system notification
-  void scheduleAlarm({
+  // Schedule exact native background alarm + in-app timer trigger
+  Future<void> scheduleAlarm({
     required int id,
     required String title,
     required String body,
     required DateTime targetDateTime,
     required BuildContext? context,
-  }) {
+  }) async {
+    await initialize();
     cancelAlarmTimer(id);
 
     final now = DateTime.now();
@@ -126,14 +144,15 @@ class NotificationHelper {
     if (duration.isNegative) return;
 
     if (context != null && context.mounted) {
-      final formattedTime = "${targetDateTime.hour.toString().padLeft(2, '0')}:${targetDateTime.minute.toString().padLeft(2, '0')}";
+      final formattedTime =
+          "${targetDateTime.hour.toString().padLeft(2, '0')}:${targetDateTime.minute.toString().padLeft(2, '0')}";
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
               const Icon(Icons.alarm_on_rounded, color: Colors.white),
               const SizedBox(width: 10),
-              Expanded(child: Text("Alarm scheduled for $formattedTime")),
+              Expanded(child: Text("⏰ Alarm scheduled for $formattedTime")),
             ],
           ),
           backgroundColor: const Color(0xFF1E8D89),
@@ -144,20 +163,74 @@ class NotificationHelper {
       );
     }
 
-    final timer = Timer(duration, () async {
-      // 1. Play continuous alarm sound ringtone
-      await playAlarmRingtone();
+    // 1. Exact system background alarm scheduling via zonedSchedule
+    try {
+      final tzTarget = tz.TZDateTime.from(targetDateTime, tz.local);
 
-      // 2. Trigger system notification
-      await showNotification(
-        id: id,
-        title: "⏰ ALARM: $title",
-        body: body,
+      final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'vitals_alarm_channel_loud_v2',
+        'Vitals Loud Native Alarm Clock',
+        channelDescription: 'High priority channel with loud alarm ringtone for health vitals',
+        importance: Importance.max,
+        priority: Priority.max,
+        showWhen: true,
+        playSound: true,
+        sound: const RawResourceAndroidNotificationSound('alarm_ringtone'),
+        enableVibration: true,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
+        category: AndroidNotificationCategory.alarm,
+        fullScreenIntent: true,
+        visibility: NotificationVisibility.public,
       );
 
-      // 3. If app is open in foreground, show ringing dialog popup
+      final platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+          presentBadge: true,
+          sound: 'alarm_ringtone.wav',
+          interruptionLevel: InterruptionLevel.critical,
+        ),
+      );
+
+      await _notificationsPlugin.zonedSchedule(
+        id,
+        "⏰ ALARM: $title",
+        body,
+        tzTarget,
+        platformChannelSpecifics,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        payload: "$title|$body|$id",
+      );
+    } catch (e) {
+      debugPrint("Error setting exact background alarm: $e");
+    }
+
+    // 2. Foreground active timer fallback for full-screen ringing UI
+    final timer = Timer(duration, () async {
+      await playAlarmRingtone();
+
       if (context != null && context.mounted) {
-        _showAlarmRingingDialog(context, title, body);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (ctx) => AlarmRingingScreen(
+              alarmId: id,
+              title: title,
+              body: body,
+            ),
+          ),
+        );
+      } else if (navigatorKey?.currentContext != null) {
+        Navigator.of(navigatorKey!.currentContext!).push(
+          MaterialPageRoute(
+            builder: (ctx) => AlarmRingingScreen(
+              alarmId: id,
+              title: title,
+              body: body,
+            ),
+          ),
+        );
       }
     });
 
@@ -173,79 +246,5 @@ class NotificationHelper {
     if (_isRinging) {
       stopAlarmRingtone();
     }
-  }
-
-  void _showAlarmRingingDialog(BuildContext context, String title, String body) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE53935),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.alarm_rounded, color: Colors.white, size: 32),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  '⏰ ALARM RINGING!',
-                  style: TextStyle(
-                    color: Color(0xFFE53935),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                body,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE53935),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              ),
-              onPressed: () {
-                stopAlarmRingtone();
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text(
-                'STOP / DISMISS ALARM',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 }
