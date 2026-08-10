@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../app_models/health_record.dart';
 import 'blood_pressure_screen.dart';
 import 'blood_sugar_screen.dart';
+import 'blood_sugar_add_record_screen.dart';
 import 'heart_rate_screen.dart';
 import 'weight_bmi_screen.dart';
 import 'info_screen.dart';
@@ -35,6 +36,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showAddRecordSheet({String? initialType}) {
+    if (initialType == 'Blood Sugar') {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => BloodSugarAddRecordScreen(
+            onSave: _addRecord,
+          ),
+        ),
+      ).then((_) => setState(() {}));
+      return;
+    }
     final valueController = TextEditingController();
     final noteController = TextEditingController();
     String selectedType = initialType ?? 'Heart Rate';
@@ -288,6 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context) => BloodSugarScreen(
                           records: _records,
                           onAddRecordTap: () => _showAddRecordSheet(initialType: 'Blood Sugar'),
+                          onRecordAdded: _addRecord,
                         ),
                       ),
                     ).then((_) => setState(() {})),

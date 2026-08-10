@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import '../app_models/health_record.dart';
 import 'base_detail_screen.dart';
+import 'blood_sugar_add_record_screen.dart';
 
 class BloodSugarScreen extends StatefulWidget {
   final List<HealthRecord> records;
-  final VoidCallback onAddRecordTap;
+  final Function(HealthRecord)? onRecordAdded;
 
   const BloodSugarScreen({
     super.key,
     required this.records,
-    required this.onAddRecordTap,
+    required VoidCallback onAddRecordTap,
+    this.onRecordAdded,
   });
 
   @override
@@ -19,13 +21,31 @@ class BloodSugarScreen extends StatefulWidget {
 class _BloodSugarScreenState extends State<BloodSugarScreen> {
   String _selectedType = 'All type';
 
+  void _openAddRecordScreen() async {
+    final newRecord = await Navigator.of(context).push<HealthRecord>(
+      MaterialPageRoute(
+        builder: (context) => BloodSugarAddRecordScreen(
+          onSave: (record) {
+            if (widget.onRecordAdded != null) {
+              widget.onRecordAdded!(record);
+            }
+          },
+        ),
+      ),
+    );
+
+    if (newRecord != null) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseDetailScreen(
       title: 'Blood Sugar',
       defaultDateFilter: 'This week',
       records: widget.records,
-      onAddRecordTap: widget.onAddRecordTap,
+      onAddRecordTap: _openAddRecordScreen,
       secondaryFilter: Align(
         alignment: Alignment.center,
         child: Container(
