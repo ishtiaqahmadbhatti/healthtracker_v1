@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../app_models/blood_pressure_record.dart';
+import '../app_models/blood_sugar_record.dart';
 import '../app_models/alarm_record.dart';
 
 class DatabaseHelper {
@@ -21,7 +22,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -43,6 +44,7 @@ class DatabaseHelper {
     ''');
 
     await _createAlarmsTable(db);
+    await _createSugarTable(db);
   }
 
   Future _createAlarmsTable(Database db) async {
@@ -64,9 +66,25 @@ class DatabaseHelper {
     ''');
   }
 
+  Future _createSugarTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS blood_sugar_records (
+        id TEXT PRIMARY KEY,
+        value REAL NOT NULL,
+        unit TEXT NOT NULL,
+        date TEXT NOT NULL,
+        state TEXT NOT NULL,
+        note TEXT NOT NULL
+      )
+    ''');
+  }
+
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _createAlarmsTable(db);
+    }
+    if (oldVersion < 3) {
+      await _createSugarTable(db);
     }
   }
 
@@ -120,6 +138,59 @@ class DatabaseHelper {
       record.toMap(),
       where: 'id = ?',
       whereArgs: [record.id],
+    );
+  }
+
+  // --- Blood Sugar Records ---
+  Future<int> insertSugarRecord(BloodSugarRecord record) async {
+    final db = await instance.database;
+    return await db.insert(
+      'blood_sugar_records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<BloodSugarRecord>> getAllSugarRecords() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'blood_sugar_records',
+      orderBy: 'date DESC',
+    );
+
+    return result.map((json) => BloodSugarRecord.fromMap(json)).toList();
+  }
+
+  Future<BloodSugarRecord?> getSugarRecordById(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'blood_sugar_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return BloodSugarRecord.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updateSugarRecord(BloodSugarRecord record) async {
+    final db = await instance.database;
+    return await db.update(
+      'blood_sugar_records',
+      record.toMap(),
+      where: 'id = ?',
+      whereArgs: [record.id],
+    );
+  }
+
+  Future<int> deleteSugarRecord(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'blood_sugar_records',
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 

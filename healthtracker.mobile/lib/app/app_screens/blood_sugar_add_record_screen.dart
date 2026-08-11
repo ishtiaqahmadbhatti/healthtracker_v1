@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import '../app_models/health_record.dart';
+import '../app_models/blood_sugar_record.dart';
+import '../app_database/db_helper.dart';
 import 'edit_target_range_screen.dart';
 
 class BloodSugarAddRecordScreen extends StatefulWidget {
   final Function(HealthRecord record)? onSave;
+  final BloodSugarRecord? sugarRecordToEdit;
 
   const BloodSugarAddRecordScreen({
     super.key,
     this.onSave,
+    this.sugarRecordToEdit,
   });
 
   @override
@@ -40,7 +44,15 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
   @override
   void initState() {
     super.initState();
-    _valueController = TextEditingController(text: "80.0");
+    if (widget.sugarRecordToEdit != null) {
+      _valueController = TextEditingController(text: widget.sugarRecordToEdit!.value.toStringAsFixed(1));
+      _selectedUnit = widget.sugarRecordToEdit!.unit;
+      _selectedState = widget.sugarRecordToEdit!.state;
+      _selectedDate = widget.sugarRecordToEdit!.date;
+      _selectedTime = TimeOfDay.fromDateTime(widget.sugarRecordToEdit!.date);
+    } else {
+      _valueController = TextEditingController(text: "80.0");
+    }
     _valueController.addListener(() {
       setState(() {});
     });
@@ -229,13 +241,16 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.black87, width: 1.2),
+                        border: Border.all(color: const Color(0xFFBDBDBD), width: 1.2),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: tempSelected,
                           isExpanded: true,
-                          icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87, size: 28),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          elevation: 6,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black87, size: 26),
                           style: const TextStyle(
                             color: Colors.black87,
                             fontSize: 16,
@@ -249,9 +264,24 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
                             }
                           },
                           items: _measurementStates.map<DropdownMenuItem<String>>((String val) {
+                            final isSelected = val == tempSelected;
                             return DropdownMenuItem<String>(
                               value: val,
-                              child: Text(val),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    val,
+                                    style: TextStyle(
+                                      color: isSelected ? const Color(0xFFEF5350) : Colors.black87,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Icon(Icons.check_rounded, color: Color(0xFFEF5350), size: 20),
+                                ],
+                              ),
                             );
                           }).toList(),
                         ),
@@ -442,9 +472,10 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
     );
   }
 
-  void _onSaveRecord() {
-    final val = _valueController.text.trim();
-    if (val.isEmpty) return;
+  Future<void> _onSaveRecord() async {
+    final valText = _valueController.text.trim();
+    final doubleVal = double.tryParse(valText);
+    if (doubleVal == null) return;
 
     final recordDateTime = DateTime(
       _selectedDate.year,
@@ -454,10 +485,27 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
       _selectedTime.minute,
     );
 
-    final record = HealthRecord(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final recordId = widget.sugarRecordToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+    final dbSugarRecord = BloodSugarRecord(
+      id: recordId,
+      value: doubleVal,
+      unit: _selectedUnit,
+      date: recordDateTime,
+      state: _selectedState,
+      note: '',
+    );
+
+    if (widget.sugarRecordToEdit != null) {
+      await DatabaseHelper.instance.updateSugarRecord(dbSugarRecord);
+    } else {
+      await DatabaseHelper.instance.insertSugarRecord(dbSugarRecord);
+    }
+
+    final healthRecord = HealthRecord(
+      id: recordId,
       type: 'Blood Sugar',
-      value: "$val $_selectedUnit",
+      value: "$valText $_selectedUnit",
       unit: _selectedUnit,
       date: recordDateTime,
       note: "$_selectedState - ${_statusInfo['status']}",
@@ -466,10 +514,12 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
     );
 
     if (widget.onSave != null) {
-      widget.onSave!(record);
+      widget.onSave!(healthRecord);
     }
 
-    Navigator.of(context).pop(record);
+    if (mounted) {
+      Navigator.of(context).pop(dbSugarRecord);
+    }
   }
 
   @override
@@ -520,14 +570,14 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
                       Container(
                         width: double.infinity,
                         height: 54,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withAlpha(8),
-                              blurRadius: 6,
+                              blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -535,8 +585,11 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedState,
-                            icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.black87, size: 28),
-                            alignment: Alignment.center,
+                            isExpanded: true,
+                            dropdownColor: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            elevation: 6,
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black87, size: 26),
                             style: const TextStyle(
                               color: Colors.black87,
                               fontSize: 17,
@@ -549,10 +602,25 @@ class _BloodSugarAddRecordScreenState extends State<BloodSugarAddRecordScreen> {
                                 });
                               }
                             },
-                            items: _measurementStates.map<DropdownMenuItem<String>>((String value) {
+                            items: _measurementStates.map<DropdownMenuItem<String>>((String val) {
+                              final isSelected = val == _selectedState;
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
+                                value: val,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      val,
+                                      style: TextStyle(
+                                        color: isSelected ? const Color(0xFFEF5350) : Colors.black87,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      const Icon(Icons.check_rounded, color: Color(0xFFEF5350), size: 20),
+                                  ],
+                                ),
                               );
                             }).toList(),
                           ),
