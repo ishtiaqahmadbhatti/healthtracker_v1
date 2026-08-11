@@ -634,7 +634,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
               const SizedBox(height: 20),
               // Visual Chart Bar Demo
               SizedBox(
-                height: 70,
+                height: 85,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -643,7 +643,7 @@ class _HeartRateScreenState extends State<HeartRateScreen> {
                     (index) {
                       final r = filtered[index];
                       final info = r.categoryInfo;
-                      final barH = (r.bpm / 160.0 * 60).clamp(18.0, 64.0);
+                      final barH = (r.bpm / 160.0 * 50).clamp(14.0, 54.0);
 
                       return GestureDetector(
                         onTap: () => _navigateToDetail(r),

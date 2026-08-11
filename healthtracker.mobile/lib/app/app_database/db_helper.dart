@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import '../app_models/blood_pressure_record.dart';
 import '../app_models/blood_sugar_record.dart';
 import '../app_models/heart_rate_record.dart';
+import '../app_models/weight_bmi_record.dart';
 import '../app_models/alarm_record.dart';
 
 class DatabaseHelper {
@@ -23,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -47,6 +48,7 @@ class DatabaseHelper {
     await _createAlarmsTable(db);
     await _createSugarTable(db);
     await _createHeartRateTable(db);
+    await _createWeightBmiTable(db);
   }
 
   Future _createAlarmsTable(Database db) async {
@@ -95,6 +97,21 @@ class DatabaseHelper {
     ''');
   }
 
+  Future _createWeightBmiTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS weight_bmi_records (
+        id TEXT PRIMARY KEY,
+        weightKg REAL NOT NULL,
+        heightCm REAL NOT NULL,
+        bmi REAL NOT NULL,
+        date TEXT NOT NULL,
+        gender TEXT NOT NULL,
+        age INTEGER NOT NULL,
+        note TEXT NOT NULL
+      )
+    ''');
+  }
+
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _createAlarmsTable(db);
@@ -104,6 +121,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 4) {
       await _createHeartRateTable(db);
+    }
+    if (oldVersion < 5) {
+      await _createWeightBmiTable(db);
     }
   }
 
@@ -261,6 +281,59 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete(
       'heart_rate_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // --- Weight & BMI Records ---
+  Future<int> insertWeightBmiRecord(WeightBmiRecord record) async {
+    final db = await instance.database;
+    return await db.insert(
+      'weight_bmi_records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<WeightBmiRecord>> getAllWeightBmiRecords() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'weight_bmi_records',
+      orderBy: 'date DESC',
+    );
+
+    return result.map((json) => WeightBmiRecord.fromMap(json)).toList();
+  }
+
+  Future<WeightBmiRecord?> getWeightBmiRecordById(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'weight_bmi_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return WeightBmiRecord.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updateWeightBmiRecord(WeightBmiRecord record) async {
+    final db = await instance.database;
+    return await db.update(
+      'weight_bmi_records',
+      record.toMap(),
+      where: 'id = ?',
+      whereArgs: [record.id],
+    );
+  }
+
+  Future<int> deleteWeightBmiRecord(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'weight_bmi_records',
       where: 'id = ?',
       whereArgs: [id],
     );

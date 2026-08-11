@@ -331,6 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context) => WeightBmiScreen(
                           records: _records,
                           onAddRecordTap: () => _showAddRecordSheet(initialType: 'Weight & BMI'),
+                          onRecordAdded: _addRecord,
                         ),
                       ),
                     ).then((_) => setState(() {})),
