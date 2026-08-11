@@ -6,6 +6,7 @@ import 'blood_sugar_add_record_screen.dart';
 import 'heart_rate_screen.dart';
 import 'weight_bmi_screen.dart';
 import 'period_tracker_screen.dart';
+import 'step_tracker_screen.dart';
 import 'info_screen.dart';
 import 'settings_screen.dart';
 
@@ -348,6 +349,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context) => PeriodTrackerScreen(
                           records: _records,
                           onAddRecordTap: () => _showAddRecordSheet(initialType: 'Period & Cycle'),
+                          onRecordAdded: _addRecord,
+                        ),
+                      ),
+                    ).then((_) => setState(() {})),
+                  ),
+                  const SizedBox(height: 12),
+                  // Step Tracker Card
+                  _buildCategoryButton(
+                    title: 'Step Tracker - Pedometer',
+                    color: const Color(0xFF10B981),
+                    icon: _buildStepTrackerIcon(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => StepTrackerScreen(
+                          records: _records,
+                          onAddRecordTap: () => _showAddRecordSheet(initialType: 'Step Tracker'),
                           onRecordAdded: _addRecord,
                         ),
                       ),
@@ -960,6 +977,48 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Icon(
                 Icons.calendar_month_rounded,
                 color: Color(0xFFE91E63),
+                size: 26,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepTrackerIcon() {
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFF34D399).withAlpha(80),
+              shape: BoxShape.circle,
+            ),
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(40),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                )
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.directions_walk_rounded,
+                color: Color(0xFF10B981),
                 size: 26,
               ),
             ),

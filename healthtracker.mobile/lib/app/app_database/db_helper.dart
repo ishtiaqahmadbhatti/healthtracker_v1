@@ -5,6 +5,7 @@ import '../app_models/blood_sugar_record.dart';
 import '../app_models/heart_rate_record.dart';
 import '../app_models/weight_bmi_record.dart';
 import '../app_models/period_record.dart';
+import '../app_models/step_record.dart';
 import '../app_models/alarm_record.dart';
 
 class DatabaseHelper {
@@ -25,7 +26,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -51,6 +52,7 @@ class DatabaseHelper {
     await _createHeartRateTable(db);
     await _createWeightBmiTable(db);
     await _createPeriodTable(db);
+    await _createStepTable(db);
   }
 
   Future _createAlarmsTable(Database db) async {
@@ -129,6 +131,21 @@ class DatabaseHelper {
     ''');
   }
 
+  Future _createStepTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS step_records (
+        id TEXT PRIMARY KEY,
+        steps INTEGER NOT NULL,
+        goalSteps INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        distanceKm REAL NOT NULL,
+        calories REAL NOT NULL,
+        activeMinutes INTEGER NOT NULL,
+        note TEXT NOT NULL
+      )
+    ''');
+  }
+
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _createAlarmsTable(db);
@@ -144,6 +161,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 6) {
       await _createPeriodTable(db);
+    }
+    if (oldVersion < 7) {
+      await _createStepTable(db);
     }
   }
 
@@ -407,6 +427,59 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete(
       'period_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // --- Step Records ---
+  Future<int> insertStepRecord(StepRecord record) async {
+    final db = await instance.database;
+    return await db.insert(
+      'step_records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<StepRecord>> getAllStepRecords() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'step_records',
+      orderBy: 'date DESC',
+    );
+
+    return result.map((json) => StepRecord.fromMap(json)).toList();
+  }
+
+  Future<StepRecord?> getStepRecordById(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'step_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return StepRecord.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updateStepRecord(StepRecord record) async {
+    final db = await instance.database;
+    return await db.update(
+      'step_records',
+      record.toMap(),
+      where: 'id = ?',
+      whereArgs: [record.id],
+    );
+  }
+
+  Future<int> deleteStepRecord(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'step_records',
       where: 'id = ?',
       whereArgs: [id],
     );
