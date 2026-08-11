@@ -4,6 +4,7 @@ import '../app_models/blood_pressure_record.dart';
 import '../app_models/blood_sugar_record.dart';
 import '../app_models/heart_rate_record.dart';
 import '../app_models/weight_bmi_record.dart';
+import '../app_models/period_record.dart';
 import '../app_models/alarm_record.dart';
 
 class DatabaseHelper {
@@ -24,7 +25,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -49,6 +50,7 @@ class DatabaseHelper {
     await _createSugarTable(db);
     await _createHeartRateTable(db);
     await _createWeightBmiTable(db);
+    await _createPeriodTable(db);
   }
 
   Future _createAlarmsTable(Database db) async {
@@ -112,6 +114,21 @@ class DatabaseHelper {
     ''');
   }
 
+  Future _createPeriodTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS period_records (
+        id TEXT PRIMARY KEY,
+        startDate TEXT NOT NULL,
+        cycleLength INTEGER NOT NULL,
+        periodLength INTEGER NOT NULL,
+        flow TEXT NOT NULL,
+        symptoms TEXT NOT NULL,
+        mood TEXT NOT NULL,
+        notes TEXT NOT NULL
+      )
+    ''');
+  }
+
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _createAlarmsTable(db);
@@ -124,6 +141,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 5) {
       await _createWeightBmiTable(db);
+    }
+    if (oldVersion < 6) {
+      await _createPeriodTable(db);
     }
   }
 
@@ -334,6 +354,59 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete(
       'weight_bmi_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // --- Period Records ---
+  Future<int> insertPeriodRecord(PeriodRecord record) async {
+    final db = await instance.database;
+    return await db.insert(
+      'period_records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<PeriodRecord>> getAllPeriodRecords() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'period_records',
+      orderBy: 'startDate DESC',
+    );
+
+    return result.map((json) => PeriodRecord.fromMap(json)).toList();
+  }
+
+  Future<PeriodRecord?> getPeriodRecordById(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'period_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return PeriodRecord.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updatePeriodRecord(PeriodRecord record) async {
+    final db = await instance.database;
+    return await db.update(
+      'period_records',
+      record.toMap(),
+      where: 'id = ?',
+      whereArgs: [record.id],
+    );
+  }
+
+  Future<int> deletePeriodRecord(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'period_records',
       where: 'id = ?',
       whereArgs: [id],
     );
