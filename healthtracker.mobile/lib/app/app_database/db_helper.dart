@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../app_models/blood_pressure_record.dart';
 import '../app_models/blood_sugar_record.dart';
+import '../app_models/heart_rate_record.dart';
 import '../app_models/alarm_record.dart';
 
 class DatabaseHelper {
@@ -22,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -45,6 +46,7 @@ class DatabaseHelper {
 
     await _createAlarmsTable(db);
     await _createSugarTable(db);
+    await _createHeartRateTable(db);
   }
 
   Future _createAlarmsTable(Database db) async {
@@ -79,12 +81,29 @@ class DatabaseHelper {
     ''');
   }
 
+  Future _createHeartRateTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS heart_rate_records (
+        id TEXT PRIMARY KEY,
+        bpm INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        status TEXT NOT NULL,
+        gender TEXT NOT NULL,
+        age INTEGER NOT NULL,
+        note TEXT NOT NULL
+      )
+    ''');
+  }
+
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _createAlarmsTable(db);
     }
     if (oldVersion < 3) {
       await _createSugarTable(db);
+    }
+    if (oldVersion < 4) {
+      await _createHeartRateTable(db);
     }
   }
 
@@ -189,6 +208,59 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete(
       'blood_sugar_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // --- Heart Rate Records ---
+  Future<int> insertHeartRateRecord(HeartRateRecord record) async {
+    final db = await instance.database;
+    return await db.insert(
+      'heart_rate_records',
+      record.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<HeartRateRecord>> getAllHeartRateRecords() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'heart_rate_records',
+      orderBy: 'date DESC',
+    );
+
+    return result.map((json) => HeartRateRecord.fromMap(json)).toList();
+  }
+
+  Future<HeartRateRecord?> getHeartRateRecordById(String id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'heart_rate_records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return HeartRateRecord.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updateHeartRateRecord(HeartRateRecord record) async {
+    final db = await instance.database;
+    return await db.update(
+      'heart_rate_records',
+      record.toMap(),
+      where: 'id = ?',
+      whereArgs: [record.id],
+    );
+  }
+
+  Future<int> deleteHeartRateRecord(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'heart_rate_records',
       where: 'id = ?',
       whereArgs: [id],
     );

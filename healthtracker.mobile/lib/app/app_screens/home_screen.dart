@@ -315,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         builder: (context) => HeartRateScreen(
                           records: _records,
                           onAddRecordTap: () => _showAddRecordSheet(initialType: 'Heart Rate'),
+                          onRecordAdded: _addRecord,
                         ),
                       ),
                     ).then((_) => setState(() {})),
